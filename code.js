@@ -287,3 +287,70 @@ app2.get("/users/:userId", (req, res) => {
 const port = 5000;
 app2.listen(port, () => console.log("Server is listening on port", port));
 ////////////////////////////////////////////////////////////////////////
+
+// PROPERTY/METHOD------------------VALUE/FUNCTION
+// req.body-------------------The parsed body of the request
+// req.query-------------------Object containing query string parameters
+// req.params-------------------Object containing named route parameters
+
+// req.body
+// For example, say you have a client and server built like the following:
+
+// Client sending request
+const data = {
+    firstName: 'John',
+    lastName: 'Adams'
+};
+
+fetch('http://localhost:4000/users', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data);
+})
+// app.js
+const express = require('express');
+const app3 = express();
+
+// This line allows the body of a request to be parsed into the req.body object
+app3.use(express.json());
+
+// Server side handling
+app3.post('/users', (req, res) => {
+    console.log(req.body);
+})
+// { firstName: 'John', lastName: 'Adams' } will be printed in your terminal
+//  when the request is made
+///////////////////////////////////////////////////////////////////////////
+// req.query
+// Express can parse query strings for you within a request
+// and place them in the form of an object in req.query
+// For example, if you made the fetch request:
+
+fetch('http://localhost:4000/users?firstName=John&lastName=Adams', {
+    method: 'GET'
+})
+// And had a server handling this request like so:
+
+// Server side handling
+app.get('/users', (req, res) => {
+    console.log(req.query.firstName);
+    console.log(req.query.lastName);
+})
+// You would see the following in your terminal:
+
+// John
+// Adams
+///////////////////////////////////////////////////////////////////////////
+// req.params
+
+fetch('http://localhost:4000/users/John/Adams', {
+    method: 'POST'
+})
+// Server side handling
+app.post('/users/:firstName/:lastName', (req, res) => {
+    console.log(req.params.firstName);   // John
+    console.log(req.params.lastName);    // Adams
+})
+///////////////////////////////////////////////////////////////////////////
