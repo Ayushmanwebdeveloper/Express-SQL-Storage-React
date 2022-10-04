@@ -150,3 +150,140 @@ app.get("/users", (req, res) => {
   res.send(users);
 });
 //////////////////////////////////////////////////////////
+// For example with fetch in the browser console, you
+// could test the POST to /users shown above:
+
+fetch('/users', {
+    method: "POST",
+    body: JSON.stringify({username: "Demo"}),
+    headers: {"Content-Type": "application/json"}
+}).then(res => res.json()).then(resBody => console.log(resBody));
+////////////////////////////////////////////////////////
+// Express server processes routes in the order they are placed in the code. When it gets to the first one that matches the incoming request,
+// it immediately responds.
+// This is bad code! DO NOT DO THIS
+app.get('/hello', (req, res) => {
+  res.send("First hello");
+});
+app.get('/hello', (req, res) => {
+  res.send("Second hello");
+});
+// Then any visitor going to the /hello route will only see "First hello".
+/////////////////////////////////////////////////////////
+// While it may seem obvious that a duplicate route is blocked,
+// it is less clear when the routes start out the same, and end differently.
+
+// This is bad code! DO NOT DO THIS
+app.get('/goodbye/*', (req, res) => {
+    res.send("Goodbye, my friend!");
+});
+
+app.get('/goodbye/until/:time', (req, res) => {
+    res.send(`Goodbye. See you ${req.params.time}.`);
+});
+
+app.get('/goodbye/until/forever', (req, res) => {
+    res.send("So long. Farewell. Have a great life!");
+});
+/*In this case, when Express sees a route that starts
+with /goodbye/ followed by anything (that's what the * means),
+then it will immediately respond with the text "Goodbye, my friend!".
+That means visitors never get to see the other two messages.*/
+/////////////////////////////////////////////////////////
+// The proper and only way to write the code for routes that are similar,
+// is to put the most specific one first.
+// In this case, /goodbye/until/forever is the most specific.
+// It is long and has no route parameters.
+
+/*The similar route with a parameter in place of forever should be
+next: /goodbye/until/:time. This order means that any time other
+than "forever" will match this route (because forever was matched first,
+so the processing never got this far).*/
+// This is good code
+app.get('/goodbye/until/forever', (req, res) => {
+    res.send("So long. Farewell. Have a great life!");
+});
+
+app.get('/goodbye/until/:time', (req, res) => {
+    res.send(`Goodbye. See you ${req.params.time}.`);
+});
+
+app.get('/goodbye/*', (req, res) => {
+    res.send("Goodbye, my friend!");
+});
+// Best practices for route order
+// Order the routes from specific to generic
+// Place similar paths together
+// In other words, this code will be easier to maintain...
+// This is a good example
+app.get('/users/:id', (req, res) => {
+    res.send("Details for a single user");
+});
+
+app.get('/users', (req, res) => {
+    res.send("List of all users");
+});
+
+app.get('/products/:id', (req, res) => {
+    res.send("Details for a single product");
+});
+
+app.get('/products', (req, res) => {
+    res.send("List of all products");
+});
+
+app.get('/purchases/from/:startDate/to/:endDate/user/:userId', (req, res) => {
+    res.send("List of all purchases in a date range for a single user");
+});
+
+app.get('/purchases/from/:startDate/to/:endDate', (req, res) => {
+    res.send("List of all purchases in a date range");
+});
+
+app.get('/purchases/user/:userId', (req, res) => {
+    res.send("List of all purchases by a single user");
+});
+
+app.get('/purchases/:id', (req, res) => {
+    res.send("Details for a single purchase");
+});
+/////////////////////////////////////////////////////
+const app1 = express();
+app1.use(express.json());
+// Once the line above has been called, the body of the request will
+// be available in req.body within each route's handler function.
+//////////////////////////////////////////////////////////////////
+//Parsing url parameters
+app.get("/users/:userId", (req, res) => {
+  const userId = req.params.userId;
+  // Process request
+});
+///////////////////////////////////////////////////////
+//Sending the response
+app.get("/users/:userId", (req, res) => {
+  const userId = req.params.userId;
+  res.status(200).send(`User details for userId: ${userId}`);
+});
+///////////////////////////////////////////////////////
+// Express's res object supports methods that can set HTTP status codes
+// and sending responses, whether that be text or JSON. res.end() is
+// also called by res.send() and res.json() so that you won't have to
+// manually do that. This doesn't mean that your server can't still
+// hang so make sure you call at least one of the methods that end the
+// response!
+////////////////////////////////////////////////////////////////////
+const express = require("express");
+
+const app2 = express();
+
+app2.use(express.json());
+
+// GET /users/:userId
+app2.get("/users/:userId", (req, res) => {
+  const userId = req.params.userId;
+  res.status(200).send(`User details for userId: ${userId}`);
+});
+
+const port = 5000;
+app2.listen(port, () => console.log("Server is listening on port", port));
+////////////////////////////////////////////////////////////////////////
