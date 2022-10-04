@@ -297,7 +297,7 @@ app2.listen(port, () => console.log("Server is listening on port", port));
 // For example, say you have a client and server built like the following:
 
 // Client sending request
-const data = {
+const data1 = {
     firstName: 'John',
     lastName: 'Adams'
 };
@@ -307,7 +307,7 @@ fetch('http://localhost:4000/users', {
     headers: {
         'Content-Type': 'application/json'
     },
-    body: JSON.stringify(data);
+    body: JSON.stringify(data1)
 })
 // app.js
 const express = require('express');
@@ -354,3 +354,35 @@ app.post('/users/:firstName/:lastName', (req, res) => {
     console.log(req.params.lastName);    // Adams
 })
 ///////////////////////////////////////////////////////////////////////////
+// PROPERTY/METHOD	VALUE--------------------FUNCTION
+// res.status()------------------	Set the HTTP status code of the response
+// res.send()-----------	Send plaintext response to the client
+// res.json()-------------	Send response in the form of JSON to the client
+// app.js
+const users = [
+    {
+        firstName: 'John',
+        lastName: 'Adams'
+    },
+    {
+        firstName: 'Thomas',
+        lastName: 'Jefferson'
+    },
+
+]
+
+app4.get('/users', (req, res) => {
+    try {
+        // Process request data
+        res.status(200);
+        res.json(users);
+    } catch(e) {
+        // On failure
+        res.status(500);
+        res.send("Failed to POST to /users");
+    }
+})
+// Since Express is built on top the http package, a lot
+// of methods and properties are still accessible (e.g. res.statusCode
+// to get status codes, or even res.end() if you want to end your
+// response without sending any data).
