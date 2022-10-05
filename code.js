@@ -386,3 +386,52 @@ app4.get('/users', (req, res) => {
 // of methods and properties are still accessible (e.g. res.statusCode
 // to get status codes, or even res.end() if you want to end your
 // response without sending any data).
+//////////////////////////////////////////////////////////////////////
+
+// In Express, a middleware function is a function that takes three arguments,
+// in this specific order:
+// req- the request object
+// res- the response object
+// next- according to the Express documentation on using middleware:
+// "the next middleware function in the application’s request-response cycle"
+const express = require("express");
+const app4 = express();
+// create a function `logTime` invoking the arguments `req`, `res`, `next`
+const logTime = (req, res, next) => {
+// have your function log the "Current time: " string with the Date function
+// to an ISO string
+console.log("Current time: ", new Date().toISOString());
+// Since no response has been returned yet invoke the `next` function so it
+// knows to move on to the next middleware function
+next();
+};
+///////////////////////////////////////////////////////////////////////////
+// You can bind middleware to an instance of the app object by using
+// the app.use() and app.METHOD() functions, where METHOD is the HTTP
+// method of the request that the middleware function handles
+// (such as GET, PUT, or POST) in lowercase (e.g. app.get() for a GET request).
+// Now, update the app.get('/') route so that it calls logTime before it
+// invokes the anonymous callback function that sends back "Hello World!"
+
+// bind the app object with the `get` method with the arguments "/" route,
+// `logTime` function, and `req`, `res`.
+app.get("/", logTime, (req, res) => {
+  //send a response of string "Hello World!"
+  res.send("Hello World!");
+  //note: We do not need to invoke a `next` function because we have returned
+  //a successful response, ending this series of functions.
+});
+// Let's recap what just happened:
+
+// When the user lands on localhost:3000, a GET request is made to
+// the "/" route of the Express server.
+// The first middleware function this route invokes is logTime. In logTime,
+// the current time is logged. At the end of logTime, it invokes next, which
+// represents the next middleware function.
+// The next middleware function in this example is the anonymous callback
+// function that runs res.send("Hello World!").
+///////////////////////////////////////////////////////////////////////////
+// You could invoke as many middleware functions as you'd like.
+// In addition, because the req and res objects are passed through
+// every one of the middleware functions, you could store values in
+// the req object for the next middleware function to use.
