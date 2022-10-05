@@ -435,3 +435,164 @@ app.get("/", logTime, (req, res) => {
 // In addition, because the req and res objects are passed through
 // every one of the middleware functions, you could store values in
 // the req object for the next middleware function to use.
+
+const passOnMessage = (req, res, next) => {
+  console.log("Passing on a message!");
+  req.passedMessage = "Hello from passOnMessage!";
+  next();
+};
+// Then, let's add this middleware function to the app.get('/') route and
+// then console.log the req.passedMessage in one of the later middleware
+// functions:
+
+app.get("/", logTime, passOnMessage, (req, res) => {
+  console.log("Passed Message: ", req.passedMessage);
+  res.send("Hello World!");
+});
+// In the example above, the passedMessage was added to the req object
+// so that it could be used in a later middleware function. Alternatively,
+// you might instead want to store properties inside of the res.local object
+// so that you don't accidentally override an existing property in the
+// req object.
+///////////////////////////////////////////////////////////////////////////
+
+// Instead of passing each middleware function in separate arguments,
+// you could also pass them all in as one array argument:
+
+app.get("/", [logTime, passOnMessage], (req, res) => {
+  console.log("Passed Message: ", req.passedMessage);
+  res.send("Hello World!");
+});
+///////////////////////////////////////////////////////////////////////////
+// Application-level middleware
+// To be clear, with the current set up, logTime and passOnMessage will only
+// be executed for the app.get('/') route. For example, let's say you set
+// up another route:
+app.get("/bye", (req, res) => {
+  res.send("Bye World.");
+});
+// Because that route does not currently take in logTime as one of its arguments,
+// it would NOT invoke the logTime middleware function. To fix this, you could
+// simply pass in the logTime function, but if there was a middleware function
+// that you wanted to execute for every single route, this could be pretty
+// tedious.
+// Setting up an application-level middleware function that runs for every
+// single route is simple.
+// To do this, remove logTime from the app.get('/') arguments. Instead, add
+// it as an application-wide middleware by writing app.use(logTime).
+// After doing this, your index.js file should look like this:
+
+const express = require("express");
+const app5 = express();
+const logTime1 = (req, res, next) => {
+  console.log("Current time: ", new Date().toISOString());
+  next();
+};
+// `app.use(logTime)` an application-level middleware- invoked everytime
+// the app recieves a request.
+app5.use(logTime1);
+const passOnMessage1 = (req, res, next) => {
+  console.log("Passing on a message!");
+  req.passedMessage = "Hello from passOnMessage!";
+  next();
+};
+
+// `app.get('/') will only invoke when the specified route is requested.
+// logTime is removed as a middleware for app.get('/')
+app5.get("/", passOnMessage1, (req, res) => {
+  console.log("Passed Message: ", req.passedMessage);
+  res.send("Hello World!");
+});
+
+app5.get("/bye", (req, res) => {
+  res.send("Bye World.");
+});
+
+// Define a port and start listening for connections.
+const port1 = 3000;
+app.listen(port1, () => console.log(`Listening on port ${port}...`));
+// Now, whenever you navigate to either localhost:3000 or localhost:3000/bye
+// the logTime middleware function will be executed. Notice how the
+// passOnMessage is only executed for the app.get('/') route.
+
+///////////////////////////////////////////////////////////////////////////
+/*To access your static assets in Express you can use the built-in
+ middleware function:*/
+express.static(root, [options]);
+// Note: The root argument is the physical location on the machine that hosts
+// the files. While it could be a full path (e.g. /projects/myapp/public),
+// it is more flexible to use a relative path (e.g. public - notice there is
+// no /).
+// In order for Express to send files to the browser, you must place
+// this inside a call to app.use(),
+app.use(path, express.static(root));
+//Now, path is the URL path, and root is the folder on the machine.
+///////////////////////////////////////////////////////////////////////////
+// images\project-public-folder.png
+// using the static assets in the public folder
+app.use('/', express.static('public'));
+// This shorthand variation does EXACTLY the same thing.
+// using the static assets in the public folder
+app.use(express.static('public'));
+// What happens is that Express looks up the files relative to the public folder
+// in your server folder, and provides them to the browser right in the root
+// URL (/) of your server.
+// Here are the urls to the files in the same order as shown in the project folder screenshot (above).
+// http://localhost:5000/css/your-style.css
+// http://localhost:5000/images/doggo.jpg
+// http://localhost:5000/images/logo.png
+// http://localhost:5000/scripts/hello.js
+// http://localhost:5000/helloworld.html
+// http://localhost:5000/prospectus.pdf
+///////////////////////////////////////////////////////////////////////////
+// You can also use multiple static assets directories and call
+// the express.static middleware function multiple times.
+// The order in which you set up the static directories with the express.static
+// function is the order Express looks up the files. In the following example
+// the public folder is called on before the files folder in the following
+// example.
+// looks up the static files in the public folder
+app.use(express.static('public'));
+// then looks up the static files in the files folder
+app.use(express.static('files'));
+// The order matters - if a file with the same name is in both public and files,
+// then the public version will be returned because it is in the code first.
+///////////////////////////////////////////////////////////////////////////
+// By mounting a path as the first argument in the middleware function you
+// can determine the specific path the browser uses to retrieve the files
+// in the static folder.
+// This example shows a browser path of /static for files in a project folder
+// named public.
+// access the static files in the public folder through the /static path
+app.use('/static', express.static('public'));
+// Now, all the files are at /static instead of the root URL (/):
+// http://localhost:5000/static/css/your-style.css
+// http://localhost:5000/static/images/doggo.jpg
+// http://localhost:5000/static/images/logo.png
+// http://localhost:5000/static/scripts/hello.js
+// http://localhost:5000/static/helloworld.html
+// http://localhost:5000/static/prospectus.pdf
+///////////////////////////////////////////////////////////////////////////
+
+// Special case for production servers
+// The folder path you provide to the express.static function is relative to
+// the folder where you are when you start the node process. If you run the
+// Express app from a folder other than the project, it is safer to use an
+// absolute path to serve your static files.The first part joined to the path is
+// the server folder (stored as a global variable __dirname__ automatically
+// set by Node.js), then the folder as always.
+// Here's a complete statement serving files in the browser path
+// of /static from the project's folder public.
+app.use('/static', express.static(path.join(__dirname, 'public')));
+// Breakdown of reading the code above:
+
+// app.use() - method that declares Express middleware
+// /static - path needed in the browser after the server & port,
+//and before the subfolder/filename of the asset
+// path.join() - method that joins the specific path segments into
+//one absolute path (path is a built-in Node.js module that you will need
+//to import)
+// __dirname - is an global variable that tells the absolute path of
+ //the folder containing the specified file
+// public is the folder in the project that holds the static assets
+///////////////////////////////////////////////////////////////////////////
