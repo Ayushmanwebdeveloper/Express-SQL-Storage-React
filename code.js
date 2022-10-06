@@ -596,3 +596,128 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
  //the folder containing the specified file
 // public is the folder in the project that holds the static assets
 ///////////////////////////////////////////////////////////////////////////
+// Defining a custom error handler
+// As you've seen in earlier lessons, Express middleware functions define three
+// parameters (req, res, next) and route handlers define two or three parameters
+// (req, res, and optionally the next parameter):
+
+// Middleware function.
+app.use((req, res, next) => {
+  console.log('Hello from a middleware function!');
+  next();
+});
+
+// Route handler function.
+app.get('/', (req, res, next) => {
+    if (req.params.message) {
+        res.send(`Echo: ${req.params.message}`);
+    } else {
+        console.log('Hello from intermediate route hander function')
+        next();
+    }
+});
+
+// Route handler function.
+app.get('/', (req, res) => {
+  res.send('Hello from a route handler function!');
+});
+// Error handling functions look the same as middleware functions except they
+// define four parameters instead of three—err, req, res, and next:
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.send('An error occurred!');
+});
+///////////////////////////////////////////////////////////////////////////
+// Custom error handler functions have to define four parameters; otherwise,
+// Express won't recognize the function as an error handler.
+
+// Define error handler functions after all other calls to app.use()
+// and all of your application's route definitions:
+
+// app.js
+
+const express = require('express');
+
+// Create the Express app.
+const app6 = express();
+
+// Define routes.
+
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Home' });
+});
+app.get('/throw-error', (req, res) => {
+  throw new Error('An error occurred!');
+});
+// Custom error handler.
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.send('An error occurred!  Please check the url, or wait a few minutes and try again.');
+});
+// Define a port and start listening for connections.
+const port6 = 8080;
+app.listen(port, () => console.log(`Listening on port ${port}...`));
+// This ensures that your custom error handler will get called to handle
+// errors from any of your application's middleware or route handler functions.
+// If you test your custom error handler by browsing to
+// http://localhost:8080/throw-error (or any other route that doesn't
+// have a handler), you'll see that it sends a response containing the
+// text "An error occurred!".
+///////////////////////////////////////////////////////////////////////////
+// If you use your browser's developer tools to inspect the response of
+// http://localhost:8080/throw-error, you'll notice that the response HTTP
+// status code is 200 OK, which is the default status code used by Express
+// when sending responses. You can use the res.status() method to set a
+// different status code:
+
+// Custom error handler.
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500);
+  res.send('An error occurred! Please check the url, or wait a few minutes and try again.');
+});
+// Notice how the err.status property is checked to see if it has a value before
+// the status is set to the literal numeric value 500. Giving priority to the
+// err.status
+///////////////////////////////////////////////////////////////////////////
+
+// Error handlers, like route handlers, are executed by Express in the order
+// that they're defined in, so defining a new error handler before the
+// existing handler ensures that it'll be called first:
+
+// Custom error handlers.
+
+// Error handler to log errors.
+app.use((err, req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    // TODO Log the error to the database.
+  } else {
+    console.error(err);
+  }
+  next(err);
+});
+
+// Generic error handler.
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.render('error', {
+    title: 'Server Error',
+    message: isProduction ? null : err.message,
+    stack: isProduction ? null : err.stack,
+  });
+});
+// The new error handler simply uses the console.error() method to
+// log errors to the console, provided that the NODE_ENV environment
+// variable isn't set to "production". In the production environment,
+// there's a TODO comment to log the error to the database. The console.error()
+// method call in the existing error handler was removed; logging errors is now
+// the responsibility of the new error handler.
+// Also, notice that the new error handler calls the next() method passing
+// in the err parameter (the current error) which passes control to the next
+// error handler. An error handler needs to call next() or return a response.
+// Failing to do this will result in the request "hanging" and consuming
+// resources on the server.
+
+
