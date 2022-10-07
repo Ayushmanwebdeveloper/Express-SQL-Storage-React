@@ -855,3 +855,68 @@ router.get('/', (req, res) => {
     res.json(roster);
 });
 ///////////////////////////////////////////////////////////////////////////
+// Load Env Variables for Node.js Apps
+// 1-Via command line
+// The simplest way to set an environment variable, is via the command line,
+// by declaring and setting the environment variable before the node command:
+
+// PORT=8080 node app.js
+// This sets an environment variable called PORT and sets its value to 8080.
+// You can even declare and set multiple environment variables:
+// PORT=8080 NODE_ENV=development node app.js
+
+// The NODE_ENV environment variable is a special variable that's used by many
+// node programs to determine what environment the application is running in.
+// For example, setting the NODE_ENV environment variable to production enables
+// features in Express that help to improve the overall performance of your
+// application. Whereas, setting NODE_ENV to development enabled features
+// for more extensive debugging.
+// 2-Within npm script
+// The command-line approach also works within any npm script specified
+// inside a package.json file:
+// {
+//   "scripts":
+//   {
+//   "start": "PORT=8080 NODE_ENV=development node app.js"
+//   }
+// }
+///////////////////////////////////////////////////////////////////////////
+// Environment variables in a Node.js application are stored as properties
+// on the process.env object:
+const port5 = process.env.PORT;
+const port7 = process.env.PORT || 8080;
+//If the PORT environment variable isn't declared and set, it'll have a value of undefined
+///////////////////////////////////////////////////////////////////////////
+//3-Using a .env file
+// The .env file is simply a plaintext file with the environment
+// variables stored as key value pairs;
+PORT = 8080;
+SECRET = password;
+NODE_ENV = production;
+SPACES = "this is a value with spaces";
+// Having the file is not enough to start using these variables just yet.
+// In Node.js, using the dotenv npm package is one way to read in environment
+// variables. Once you set all of your environment variables in a .env file,
+// the dotenv package will load your variables from that file and set them on
+// the process.env object.
+// app.js
+const express = require('express');
+
+// Load the environment variables from the .env file
+require('dotenv').config();
+
+// Create the Express app.
+const app8 = express();
+
+// Define routes.
+
+app.get('/', (req, res) => {
+  res.send('Hello from Express!');
+});
+
+// Define a port and start listening for connections.
+const port8 = process.env.PORT || 8080;
+app.listen(port, () => console.log(`Listening on port ${port}...`));
+///////////////////////////////////////////////////////////////////////////
+// If you're using Git for your source control, make sure that your
+// .gitignore file includes an entry for .env files.
