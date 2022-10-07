@@ -719,5 +719,139 @@ app.use((err, req, res, next) => {
 // error handler. An error handler needs to call next() or return a response.
 // Failing to do this will result in the request "hanging" and consuming
 // resources on the server.
+///////////////////////////////////////////////////////////////////////////
+// Defining a collection of route handlers
+// While it's not required, a common convention is to create each Express router
+// instance within its own Node module. Remember that in Node, each file is
+// treated as a separate module. Create a folder in your project's root
+// directory named routes; create three files called home.js, schedule.js,
+// and roster.js within the folder. Then you'll need to include the following
+// code in each:
 
+const express = require('express');
 
+// Create the router instance
+// The express module exports the Router class via a property on theexpress
+const router = express.Router();
+// function, which is used to create an instance of a router.
+// Previously, you've defined your routes using an Express Application (app)
+// object. This is done the same way in a router instance. For this reason,
+// a router can be thought of as a "mini-app".
+// The Express Application (app) object and Express Router objects (router) also
+// handle middlewares in the same way.
+// Using the router.get() method, define a collection of routes for a sports
+// team including "Home", "Schedule", and "Roster" pages.
+// Start with home.js, which just contains a simple GET route:
+
+// home.js - continued (after require and router declaration found above)
+
+router.get('/home', (req, res) => {
+ res.send('Our team homepage');
+});
+// Then move on to schedule.js:
+
+// schedule.js - continued (after require and router declaration found above)
+const weeklySchedule = [false, true, true, false, true, false, true];
+
+router.get('/schedule/week', (req, res) => {
+    // Send the full weekly schedule
+    res.json(weeklySchedule);
+});
+
+router.put('/schedule/week/:day', (req, res) => {
+    // Update the schedule for specified day to have a game
+    const day = parseInt(req.params.day);
+    weeklySchedule.splice(day, 1, true);
+    res.json(weeklySchedule);
+})
+// And finally, fill out roster.js:
+
+// roster.js - continued (after require and router declaration found above)
+const roster = {
+    pg: 'Randy',
+    sg: 'Anthony',
+    sf: 'Noah',
+    pf: 'Benjamin',
+    c: 'Miles'
+}
+
+router.get('/roster', (req, res) => {
+    // Send roster data
+    res.json(roster);
+})
+
+router.put('/roster/:position', (req, res) => {
+    // Update position with data from request body
+    const position = req.params.position;   // e.g. pg
+    const newPlayer = req.body.name;        // e.g. Cameron
+    roster[position] = newPlayer;
+    res.json(roster);
+})
+
+router.delete('/roster/:position', (req, res) => {
+    // Remove player from position
+    const position = req.params.position;
+    delete roster[position];
+    res.json(roster);
+})
+// Export the router
+// In all three files, you'll need to export the router to the module.exports
+// property to import into your main application later:
+
+// module.exports = router;
+// For more information about the Express Router class, see the official
+// documentation on Express Router
+///////////////////////////////////////////////////////////////////////////
+// You can also supply another argument to prepend a path for which to apply
+// the router.
+
+app.use('/', home);
+// The routes are like middleware and are applied to any path beginning with
+// the path provided (in this case every path since every path begins with /).
+// This can make the router imports a lot more understandable from within
+// app.js, and your routers' routes cleaner.
+// For example, currently we have:
+
+// app.js
+app.use(schedule);
+
+// schedule.js
+router.get('/schedule/week', (req, res) => {
+    // Send the full weekly schedule
+    res.json(weeklySchedule);
+});
+// But using the path argument:
+
+// app.js
+app.use('/schedule', schedule);
+
+// schedule.js
+router.get('/week', (req, res) => {
+    // Send the full weekly schedule
+    res.json(weeklySchedule);
+});
+///////////////////////////////////////////////////////////////////////////
+//Best Practices
+// app.js
+app.use('/home', home);
+app.use('/schedule', schedule);
+app.use('/roster', roster);
+
+// routes/home.js
+router.get('/', (req, res) => {
+    res.send('Our team homepage');
+});
+
+// routes/schedule.js
+router.get('/week', (req, res) => {
+    // Send the full weekly schedule
+    res.json(weeklySchedule);
+});
+
+// routes/roster.js
+
+router.get('/', (req, res) => {
+    // Send roster data
+    res.json(roster);
+});
+///////////////////////////////////////////////////////////////////////////
