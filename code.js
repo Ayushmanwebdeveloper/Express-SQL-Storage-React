@@ -1136,3 +1136,244 @@ CREATE TABLE juice_boxes (
   student_id INTEGER,
   FOREIGN KEY (student_id) REFERENCES students(id)
 );`;
+///////////////////////////////////////////////////////////////////////////
+`
+A many-to-many relationship accurately describes itself -
+two entities are connected such that an entity of ONE type connects to
+ONE OR MORE (a.k.a. MANY) entities of another type AND ONE entity of the
+second type connects to ONE OR MORE (a.k.a. MANY) entities of the first
+type.
+one-a-to-many-b + one-b-to-many-a = many-a-to-many-b
+
+Consider students attending elementary school. Each student will study
+more than one subject. Also, each subject will be studied by more than
+one student.
+
+One student => Many subjects
+One subject => Many students
+When combined, this means many students are related to many subjects,
+a.k.a. a many-to-many relationship between students and subjects.
+`;
+///////////////////////////////////////////////////////////////////////////
+`
+Here is a small portion of the data in the students table:
+
+ID	NAME
+1	Alim
+2	Andrei
+3	Belma
+Here are a few records from the subjects table:
+
+ID	NAME
+101	Reading
+102	Writing
+103	Arithmetic
+104	Art
+105	Music
+Here are all the combinations of students taking subjects:
+
+STUDENT ID	STUDENT NAME	STUDENT_ID	SUBJECT_ID	SUBJECT ID	SUBJECT NAME
+1	Alim	1	101	101	Reading
+1	Alim	1	102	102	Writing
+1	Alim	1	103	103	Arithmetic
+1	Alim	1	104	104	Art
+2	Andrei	2	101	101	Reading
+2	Andrei	2	102	102	Writing
+2	Andrei	2	103	103	Arithmetic
+2	Andrei	2	105	105	Music
+3	Belma	3	101	101	Reading
+3	Belma	3	102	102	Writing
+3	Belma	3	103	103	Arithmetic
+3	Belma	3	104	104	Art
+And here is another view for these combinations.
+
+Note: the subject_id and student_id columns have been reversed
+to improve readability, and because it doesn't matter - just like
+rearranging columns in Microsoft Excel or Google Sheets.
+
+SUBJECT ID	SUBJECT NAME	SUBJECT_ID	STUDENT_ID	STUDENT ID	STUDENT NAME
+101	Reading	101	1	1	Alim
+102	Writing	102	1	1	Alim
+103	Arithmetic	103	1	1	Alim
+104	Art	104	1	1	Alim
+101	Reading	101	2	2	Andrei
+102	Writing	102	2	2	Andrei
+103	Arithmetic	103	2	2	Andrei
+105	Music	105	2	2	Andrei
+101	Reading	101	3	3	Belma
+102	Writing	102	3	3	Belma
+103	Arithmetic	103	3	3	Belma
+104	Art	104	3	3	Belma
+`;
+///////////////////////////////////////////////////////////////////////////
+`
+Schema for the abbreviated students and subjects tables in this example:
+
+COLUMN	TYPE	CONSTRAINTS
+id	INTEGER	PRIMARY KEY
+name	TEXT
+
+Schema for student-subject join table:
+
+COLUMN	TYPE	CONSTRAINTS
+student_id	INTEGER	FOREIGN KEY REFERENCES students(id)
+subject_id	INTEGER	FOREIGN KEY REFERENCES subjects(id)
+
+Represented visually in a schema diagram a many-to-many relationship can
+be easy to spot because the join table sits between two connector lines.
+When the two connector lines are labelled with 1 and * on opposite ends,
+this leads to * to * - meaning "many" to "many" - between the two entity
+tables.
+`;
+///////////////////////////////////////////////////////////////////////////
+`The following code shows how to create these tables with the
+many-to-many relationship in SQLite3.
+
+CREATE TABLE students (
+  id INTEGER PRIMARY KEY,
+  name TEXT
+);
+
+CREATE TABLE subjects (
+  id INTEGER PRIMARY KEY,
+  name TEXT
+);
+
+CREATE TABLE student_subject (
+  student_id INTEGER,
+  subject_id INTEGER,
+  FOREIGN KEY (student_id) REFERENCES students(id)
+  FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);` ///////////////////////////////////////////////////////////////////////////
+`In a many-to-many relationship, multiple records in Table A are
+associated with multiple records in Table B. You would normally
+create a third table for this relationship called a join table,
+which contains the primary keys from both tables.
+A join table table is a table that sits between the other tables in a
+many-to-many relationship. It stores a record of each of the foreign keys
+of the other tables. Which is used to reference the data from the other
+tables. Overall, a join table provides a more developed data structure.
+`;
+///////////////////////////////////////////////////////////////////////////
+`Products
+
+ID	NAME
+1597	Glass Coffee Mug
+1598	Metallic Coffee Mug
+1599	Smart Coffee Mug
+Users
+
+ID	NAME
+1	Alice
+2	Bob
+Orders
+
+ID	PURCHASER_ID
+10	1
+11	1
+12	2
+Order Details
+
+ID	ORDER_ID	PRODUCT_ID
+1	10	1599
+2	11	1597
+3	11	1598
+4	12	1597
+5	12	1598
+6	12	1599
+
+Take a moment to analyze the data above. Using the foreign keys,
+you should be able to reason out that "Alice" has two orders.
+One order containing a "Smart Coffee Mug" and another order
+containing both a "Glass Coffee Mug" and "Metallic Coffee Mug".
+Bob had one order containing three items, one of each mug.
+`;
+///////////////////////////////////////////////////////////////////////////
+`Stages of Relational Database Design`;
+`1. Define database purpose and entities
+For example, if you were creating a database for order processing on an
+e-commerce application, you would need a database with at least three
+tables: a products table, an orders tables, and a users (i.e. customers)
+table. You can reason that a product will probably have an ID, name, and
+price, and an order will contain one or more product IDs. Also, each user
+can place multiple orders.
+
+2. Identify primary keys
+The second stage is to identify the primary key (PK) of each table.
+As we previously learned, a table’s primary key contains a unique value
+or values, that identifies each distinct record. For our above example of
+online orders, we would probably create IDs to serve as the primary key for
+each table: a product ID, an order ID, and a user ID.
+
+3. Establish table relationships
+The third stage is to establish the relationships among the tables in the
+database. There are three types of relational database table relationships:
+
+One-to-one
+One-to-many
+Many-to-many
+In this reading, you will be focusing on the one-to-many relationship.
+A one-to-one relationship is a simple form of one-to-many. Designing
+many-to-many relationships will be covered in the next reading.
+
+One-to-many relationship
+
+In a one-to-many relationship, each record in Table A is associated with
+multiple records in Table B. Each record in Table B is associated with only
+one record in Table A. This is achieved by utilizing the primary key and
+foreign key. The foreign key in Table B references the primary key of Table A.
+
+The above schema depicts a one-to-many relationship between the
+users table and the orders table: One user can create multiple orders.
+
+The primary key of the users table (id) is a foreign key in the
+orders table (purchaser_id). This allows the foreign key (purchaser_id)
+in the orders table to reference the users table (id) to identify
+which user made each order.
+
+This table relationship would produce the following example data
+(not all columns are included):
+Users
+
+ID	NAME
+1	Alice
+2	Bob
+Orders
+
+ID	PURCHASER_ID
+10	1
+11	1
+12	2
+
+Take a moment to analyze the data above. Using the foreign keys, you should
+be able to reason out that "Alice" has made two orders and "Bob" has made
+one order.
+
+4. Apply normalization rules
+The fourth stage in RDD is normalization. Normalization is the
+process of optimizing the database structure so that redundancy and
+confusion are eliminated.
+
+The rules of normalization are called “normal forms” and are as follows:
+
+First normal form
+Second normal form
+Third normal form
+Boyce-Codd normal form
+Fifth normal form
+The first three forms are widely used in practice, while the
+fourth and fifth are less often used.
+
+First normal form rules:
+
+Eliminate repeating groups in individual tables.
+Create a separate table for each set of related data.
+Identify each set of related data with a primary key.
+Second normal form rules:
+
+Create separate tables for sets of values that apply to multiple records.
+Relate these tables with a foreign key.
+Third normal form rules:
+
+Eliminate fields that do not depend on the table's key.
+`;
