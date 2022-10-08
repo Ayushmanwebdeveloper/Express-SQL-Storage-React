@@ -999,3 +999,140 @@ true as 1 (one)*/
 //A column describes a property of an entity, such as breed for a dogs table.
 //A table describes an entity, such as dogs. Its columns describe properties
 //of the entity and its records are individual instances of the entity.
+//Schema design tools
+// Free Database Diagram (ERD) Design Tools:
+
+// dbdiagram.io
+// drawsql.app
+// Lucidchart
+// draw.io
+// QuickDBD
+///////////////////////////////////////////////////////////////////////////
+// These tables (a.k.a. entities) contain rows (a.k.a. records) and columns
+// (a.k.a. fields). You also learned how to uniquely identify table records by
+// adding a PRIMARY KEY
+// To relate one table to another, a FOREIGN KEY column is included which is
+// associated with - or references the PRIMARY KEY in another table.
+
+`people table:
+
+SSN	FIRST_NAME	LAST_NAME
+123-45-6789	John	Doe
+987-65-4329	Jane	Doe
+987-65-4320	John	Smith
+
+jobs table:
+
+ID	JOB_NAME	START_DATE	END_DATE	PERSON_SSN
+1	Bookkeeper	1997-03-05	2004-09-30	123-45-6789
+2	Janitor	2000-01-04		             987-65-4329
+3	Marketer	2002-11-12	2005-12-20	987-65-4320
+4	Accountant	2004-10-01		         123-45-6789
+The column ssn is the PRIMARY KEY in the people table. The jobs
+table uses the person_ssn column as the FOREIGN KEY to reference
+rows in the people table`///////////////////////////////////////////////////////////////////////////
+`people table:
+
+SSN	FIRST_NAME	LAST_NAME
+123-45-6789	John	Doe
+987-65-4329	Jane	Doe
+987-65-4320	John	Smith
+jobs table:
+
+ID	JOB_NAME	START_DATE	END_DATE	PERSON_SSN
+1	Bookkeeper	1997-03-05	2004-09-30	123-45-6789
+2	Janitor	2000-01-04		987-65-4329
+3	Marketer	2002-11-12	2005-12-20	987-65-4320
+4	Accountant	2004-10-01		123-45-6789
+people table:
+
+SSN	FIRST_NAME	LAST_NAME
+123-45-6789	John	Doe
+987-65-4329	Jane	Doe
+987-65-4320	John	Smith
+jobs table:
+
+ID	JOB_NAME	START_DATE	END_DATE	PERSON_SSN
+1	Bookkeeper	1997-03-05	2004-09-30	123-45-6789
+2	Janitor	2000-01-04		987-65-4329
+3	Marketer	2002-11-12	2005-12-20	987-65-4320
+4	Accountant	2004-10-01		123-45-6789
+A one-to-many relationship is exactly what it sounds like - an entity of
+ONE type connects to ONE OR MORE (a.k.a. MANY) entities of another type.`///////////////////////////////////////////////////////////////////////////
+`Here is a small portion of the data in the students table:
+
+ID	NAME
+1	Alim
+2	Andrei
+3	Belma
+Here are a few records from the juice_boxes table:
+
+ID	JUICE	DATE	STUDENT_ID
+111	apple	2020-01-22	1
+112	apple	2020-01-22	2
+113	orange	2020-01-22	3
+114	apple	2020-01-23	1
+115	orange	2020-01-23	1
+116	peach-mango	2020-01-23	2
+117	grape	2020-01-23	3
+Here's all the combinations of which student drank which juice on which day:
+
+JUICE_BOX ID	JUICE	DATE	STUDENT_ID	STUDENT ID	STUDENT NAME
+111	apple	2020-01-22	1	1	Alim
+112	apple	2020-01-22	2	2	Adrei
+113	orange	2020-01-22	3	3	Belma
+114	apple	2020-01-23	1	1	Alim
+115	orange	2020-01-23	1	1	Alim
+116	peach-mango	2020-01-23	2	2	Adrei
+117	grape	2020-01-23	3	3	Belma
+
+And here's another way to represent this same data:
+
+STUDENT ID	STUDENT NAME	JUICE_BOX ID	JUICE	DATE	STUDENT_ID
+1	Alim	111	apple	2020-01-22	1
+1	Alim	114	apple	2020-01-23	1
+1	Alim	115	orange	2020-01-23	1
+2	Adrei	112	apple	2020-01-22	2
+2	Adrei	116	peach-mango	2020-01-23	2
+3	Belma	113	orange	2020-01-22	3
+3	Belma	117	grape	2020-01-23	3`;
+///////////////////////////////////////////////////////////////////////////
+`It can be very helpful to write down the representation of a database
+to specify the way it is structured. This structure is called the schema.
+
+Schema for students table:
+
+COLUMN	TYPE	CONSTRAINTS
+id	INTEGER	PRIMARY KEY
+name	TEXT   NULL
+
+Schema for juice_boxes table:
+
+COLUMN	TYPE	CONSTRAINTS
+id	INTEGER	PRIMARY KEY
+juice	 TEXT
+date	 TEXT
+student_id	INTEGER	FOREIGN KEY REFERENCES students(id)
+///////////////////////////////////////////////////////////////////////////
+../images/db_schema.png`;
+// Notice there is a direct relationship from the student_id field in the
+// juice_boxes table to the id field in the students table. Many diagramming
+// tools will label the connection line with a 1 and a * to represent the
+// one-to-many relationship (as shown).
+///////////////////////////////////////////////////////////////////////////
+`SQL Commands
+The following code shows how to create these tables with the one-to-many
+relationship in SQLite3.
+
+CREATE TABLE students (
+  id INTEGER PRIMARY KEY,
+  name TEXT
+);
+
+CREATE TABLE juice_boxes (
+  id INTEGER PRIMARY KEY,
+  juice TEXT,
+  date TEXT,
+  student_id INTEGER,
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);`;
