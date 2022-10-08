@@ -920,3 +920,82 @@ app.listen(port, () => console.log(`Listening on port ${port}...`));
 ///////////////////////////////////////////////////////////////////////////
 // If you're using Git for your source control, make sure that your
 // .gitignore file includes an entry for .env files.
+///////////////////////////////////////////////////////////////////////////
+
+
+// A relational database management system is software that manages collections
+// of structured data called databases.
+// SQLite is one of many relational database management systems and the one
+// that you will be using.
+// A database is a collection of structured data that an RDBMS manages for you.
+// The Structured Query Language (SQL) is a programming language that allows you
+// to define the relational structure of the database and interact with the data
+// in it.
+///////////////////////////////////////////////////////////////////////////
+//Database Table Schemas
+// A table is a "logical" structure that defines how data is stored and
+// contains that data that meets the definition. Most people think about
+// tables like spreadsheets
+// NAME	AGE_YRS	BREED	WEIGHT_LBS	MICROCHIPPED
+// Callie	1	Corgi	16	no
+// Charley	1.5	Basset Hound	25	no
+// Jaxon	0.4	Beagle	19	yes
+// In SQL, table columns must be given a specific type. Much like JavaScript
+// variable types, each column type is allocated a maximum amount of storage.
+///////////////////////////////////////////////////////////////////////////
+// ANSI SQL supports the following types:
+
+// The INTEGER should be familiar. It's just a number without a decimal.
+
+// The DECIMAL type is a number with a decimal, a.k.a. a floating-point number.
+// Another way you can use the DECIMAL type is to give it two arguments
+// DECIMAL(4, 2) will hold the number 23.22, but not the numbers 123.22
+// (too many total digits) or 23.222 (which it will just ignore the extra decimal
+// places and store 23.22).
+// There are three kinds of commonly used string types that databases support
+// based on the ANSI SQL standard.
+// The most commonly used type is known as the Variable Character, or VARCHAR
+// So, to specify that a column can hold up to 50 characters, you would write
+// VARCHAR(50) in the table definition.
+// Another commonly used type is known simply as TEXT. This is a column that
+// can contain an "unlimited" number of characters.
+// Boolean types
+// When you need to store a true or false value in the database, use
+// the BOOLEAN type.
+///////////////////////////////////////////////////////////////////////////
+
+// Column types in SQLite
+/*INTEGER - A number without decimals
+REAL - A number with decimals (floating-point)
+TEXT - A string
+BLOB - Data stored exactly as it was input (good for images, really long text,
+and other big "blobs" of stuff)
+NUMERIC - Special case for numbers which auto-converts between the other
+types, depending on the value
+
+Fortunately, SQLite can understand the more rigid types, and it will
+"translate" to the corresponding SQLite column type.
+
+SQLite will convert the BOOLEAN type to NUMERIC.
+false as 0 (zero)
+true as 1 (one)*/
+// NULL is a possible value in a column that represents an empty column value
+// If you want the column to have a default value when no value is given on
+// insertion, use the DEFAULT constraint
+// A primary key is a column that contains unique identifiers for each entity
+// in the table. For example, a Social Security Number is unique to a single
+// person and could potentially be used as a primary key on a table that stores
+// data of US citizens.
+// Often, primary keys are integers (a.k.a. INTEGER PRIMARY KEY) because
+
+// There is not another column that must have a unique value
+// An integer primary key optimizes your SQL database for the fastest performance
+// when retrieving data by the identifying column
+// AUTOINCREMENT is commonly used in a primary key column,
+// e.g. INTEGER PRIMARY KEY AUTOINCREMENT. 1234->1235->1236
+
+// A record in a table is an instance of the entity, such as a record for
+// Callie the Corgi in the dogs table.
+//A column describes a property of an entity, such as breed for a dogs table.
+//A table describes an entity, such as dogs. Its columns describe properties
+//of the entity and its records are individual instances of the entity.
