@@ -1757,7 +1757,8 @@ app.get('/trees/:id', (req, res, next) => {
     });
 });
 
-Running other SQL statements, like INSERT, DELETE and UPDATE follow a similar pattern:
+Running other SQL statements, like INSERT, DELETE and UPDATE follow a similar
+pattern:
 
 Constant for the SQL statement, with ? where dynamic values need to go
 Constant array for the params to substitute for each ? in the same order
@@ -1771,10 +1772,9 @@ goes wrong.
 Here's an example - notice the 4 question marks (?) match the 4 params.
 
 app.post('/trees', (req, res, next) => {
-   const sql = `
-    //      INSERT INTO trees (tree, location, height_ft, ground_circumference_ft)
-    //      VALUES (?, ?, ?, ?);
-     `;
+   const sql = `//      INSERT INTO trees (tree, location, height_ft, ground_circumference_ft)
+//      VALUES (?, ?, ?, ?);
+`;
     const params = [
         req.body.name,
         req.body.location,
@@ -1792,4 +1792,79 @@ app.post('/trees', (req, res, next) => {
         }
     });
 });
+There are three common functions used to access the database:
+
+db.all() for retrieving multiple rows from a table
+db.get() for retrieving one row from a table
+db.run() for executing SQL statements which modify data in a table
 `;
+///////////////////////////////////////////////////////////////////////////
+`Intermediate SQL
+
+WHERE clause for a list of values
+You can also add a WHERE clause to check for a list of values.
+The syntax is WHERE [column] IN ('value1', 'value2', 'value3').
+Let's say you wanted to find the name and breed of the puppies who
+are Corgis, Beagles, or Yorkshire Terriers. You could do so with
+the query below:
+
+SELECT name, breed FROM puppies
+  WHERE breed IN ('Corgi', 'Beagle', 'Yorkshire Terrier');
+Running this query should yield the following results:
+
+NAME	BREED
+Indie	Yorkshire Terrier
+Callie	Corgi
+Jaxson	Beagle
+
+WHERE clause for a range of values
+SELECT name, breed, age_yrs FROM puppies
+  WHERE age_yrs BETWEEN 0 AND 0.5;
+Entering this query should yield the following results:
+
+NAME	BREED	AGE_YRS
+Indie	Yorkshire Terrier	0.5
+Jaxson	Beagle	0.4
+
+ORDER BY
+Getting the values back from a database in any order it wants to give
+them to you is ludicrous. Instead, you will often want to specify the
+order in which you get them back. Say you wanted them in alphabetical
+order by their name. Then, you would write
+
+SELECT name, breed
+  FROM puppies
+  ORDER BY name;
+Say you wanted that returned from oldest dog to youngest dog. You would
+write
+
+SELECT name, breed
+  FROM puppies
+  ORDER BY age_yrs DESC;
+where DESC means in descending order. Note that the column that you order
+on does not have to appear in the column list of the SELECT statement.
+
+LIMIT and OFFSET
+Say your query would return one million rows because you've cataloged every
+puppy in the world. That would be a lot for any application to handle.
+Instead, you may want to limit the number of rows returned. You can do
+that with the LIMIT keyword.
+
+SELECT name, breed
+  FROM puppies
+  ORDER BY age_yrs
+  LIMIT 100;
+That would return the name and breed of the 100 youngest puppies. (Why?)
+That is, of the million rows that the statement would find, it limits the
+number to only 100.
+
+Let's say you want to see the next 100 puppies after the first hundred.
+You can do that with the OFFSET keyword which comes after the LIMIT clause.
+
+SELECT name, breed
+  FROM puppies
+  ORDER BY age_yrs
+  LIMIT 100 OFFSET 100;
+That will return only rows 101 - 200 of the result set. It limits the
+total number of records to return to 100. Then, it starts at the 100th
+row and counts 100 records. Those are the records returned.`;
