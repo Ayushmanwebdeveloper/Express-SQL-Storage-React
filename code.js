@@ -1868,3 +1868,87 @@ SELECT name, breed
 That will return only rows 101 - 200 of the result set. It limits the
 total number of records to return to 100. Then, it starts at the 100th
 row and counts 100 records. Those are the records returned.`;
+///////////////////////////////////////////////////////////////////////////
+`
+SQL Operators
+A SQL operator is a word or character that is used inside a WHERE clause
+to perform comparisons or arithmetic operations. In previous examples, you
+used SQL operators inside of WHERE clauses to filter table rows -- =, IN,
+BETWEEN, and AND.
+
+Logical operators
+
+OPERATOR	DESCRIPTION
+[ALL]	TRUE if all of the subquery values meet the condition.
+[AND]	TRUE if all the conditions separated by AND are TRUE.
+[ANY]	TRUE if any of the subquery values meet the condition.
+[BETWEEN]	TRUE if the operand is within the range of comparisons.
+[EXISTS]	TRUE if the subquery returns one or more records.
+[IN]	TRUE if the operand is equal to one of a list of expressions.
+[LIKE]	TRUE if the operand matches a pattern (accepts "wildcards").
+[NOT]	Displays a record if the condition(s) is NOT TRUE.
+[OR]	TRUE if any of the conditions separated by OR is TRUE.
+[SOME]	TRUE if any of the subquery values meet the condition.
+
+Here is another example query with a WHERE clause using several logical
+operators: NOT, IN, AND, and LIKE.
+
+SELECT name, breed FROM puppies
+  WHERE breed NOT IN ('Miniature Schnauzer', 'Basset Hound', 'Labradoodle')
+    AND breed NOT LIKE '%Shepherd';
+Note: Pay attention to that LIKE operator. You will use it more than you
+want to. The wildcard it uses is the percent sign. Here's a table to help you understand.
+
+LIKE	MATCHES "DOG"	MATCHES "HOTDOG"	MATCHES "DOG-TIRED"	MATCHES "ORDOGORDO"
+'dog'	yes	no	no	no
+'%dog'	yes	yes	no	no
+'dog%'	yes	no	yes	no
+'%dog%'	yes	yes	yes	yes
+
+
+Arithmetic operators
+OPERATOR	MEANING	SYNTAX
++	Addition	a + b
+-	Subtraction	a - b
+*	Multiplication	a * b
+/	Division	a / b
+%	Modulus (returns remainder)	a % b
+Here is an example query with a WHERE clause using the
+multiplication operator to find puppies that are 6 months old:
+
+SELECT name, breed, age_yrs FROM puppies
+  WHERE age_yrs * 10 = 6;
+
+  Comparison operators
+OPERATOR	MEANING	SYNTAX
+=	Equals	a = b
+!=	Not equal to	a != b
+<>	Not equal to	a <> b
+>	Greater than	a > b
+<	Less than	a < b
+>=	Greater than or equal to	a >= b
+<=	Less than or equal to	a <= b
+!<	Not less than	a !< b
+!>	Not greater than	a !> b
+Here is an example query with a WHERE clause using the > comparison operator:
+
+SELECT name, breed, weight_lbs FROM puppies
+  WHERE weight_lbs > 50;
+///////////////////////////////////////////////////////////////////////////
+If you wanted to use multiple clauses in a single SELECT statement,
+the order by which you write them matters. For example, using ORDER BY
+before your WHERE clause would make no sense. The WHERE clause is filtering
+your results so ordering them should come after as ordering your data before
+filtering doesn't do anything.
+
+Here's an example of a query that uses all the clauses:
+
+SELECT column1, column2
+FROM table
+  WHERE constraint_expression
+  ORDER BY column ASC/DESC
+  LIMIT num OFFSET num;
+   the results should first go through the WHERE filter.
+  The 2 remaining clauses depend on the filtered result. Similarly,
+  ORDER BY should come next, as using LIMIT before could result in lost data.
+`;
