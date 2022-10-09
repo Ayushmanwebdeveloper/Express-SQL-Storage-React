@@ -1564,3 +1564,78 @@ You should get the following result:
 ID	NAME	AGE_YRS	BREED	WEIGHT_LBS	MICROCHIPPED
 5	Charley	1.5	Basset Hound	25	no`;
 ///////////////////////////////////////////////////////////////////////////
+`DELETE statements have the following syntax: DELETE FROM [table] WHERE
+[condition];
+DELETE FROM puppies
+  WHERE microchipped = 0;
+  SELECT * FROM puppies;
+You would get the following result:
+
+NAME	AGE_YRS	BREED	WEIGHT_LBS	MICROCHIPPED
+Cooper	1	Miniature Schnauzer	18	1
+Indie	0.5	Yorkshire Terrier	13	1
+Zoe	0.8	Korean Jindo	32	1
+Ladybird	0.6	Labradoodle	20	1
+Jaxson	0.4	Beagle	19	1
+Leinni	1	Miniature Schnauzer	25	1
+  `;
+///////////////////////////////////////////////////////////////////////////
+`
+First, you'll need a database table. Consider one with these specifications:
+
+NAME	DATA TYPE	CONSTRAINTS
+id	INTEGER	PRIMARY KEY AUTOINCREMENT
+first_name	VARCHAR(255)	NOT NULL
+last_name	VARCHAR(255)	NOT NULL
+This table can be created with this SQL statement:
+
+CREATE TABLE friends (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL
+);
+Second, the table should be populated with data like this:
+
+ID	FIRST_NAME	LAST_NAME
+1	Amy	Pond
+2	Rose	Tyler
+3	Martha	Jones
+4	Donna	Noble
+5	River	Song
+This data can be inserted using the following SQL statement:
+
+INSERT INTO friends (first_name, last_name)
+VALUES
+('Amy', 'Pond'),
+('Rose', 'Tyler'),
+('Martha', 'Jones'),
+('Donna', 'Noble'),
+('River', 'Song');
+Updating a row in a database table
+In order to update data in a database, you'll need to specify:
+
+The table to UPDATE
+Which column to SET with the new value to set it too
+WHERE to find the row to update.
+Imagine your friend Amy Pond gets married to Sam Blue.
+Now, you need to update her last name.
+
+UPDATE friends
+SET last_name = 'Blue'
+WHERE first_name = 'Amy' AND last_name = 'Pond';
+It is a good practice to verify each UPDATE after you run it:
+
+SELECT * FROM friends;
+If no rows match the WHERE statement, the UPDATE will fail silently.
+This means there is no error message, and the table is unchanged.
+Sometimes, you will receive an error when updating data.
+
+For example, if you try to modify a column with a UNIQUE constraint.
+
+# BAD - DO NOT DO THIS!
+UPDATE friends
+SET id = 2
+WHERE id = 1;
+Because id is a primary key and the new value for the id is already taken, you will see a message in SQLite that it already exists:
+
+Error: UNIQUE constraint failed: friends.id`;
