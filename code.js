@@ -1377,3 +1377,190 @@ Third normal form rules:
 
 Eliminate fields that do not depend on the table's key.
 `;
+///////////////////////////////////////////////////////////////////////////
+/*SQL Commands*/
+
+`CREATE/DROP Tables
+Names of tables should be in snake_case and should not create spaces or
+dashes.They should contain only lower case letters, numbers, and
+underscores.
+Writing the SQL
+Creating a table with SQL has this general syntax.
+
+CREATE TABLE «table name» (
+  «column name» «data type»,
+  «column name» «data type»,
+  ...
+  «column name» «data type»
+);
+
+Example-
+COLUMN	JS DATA TYPE	MAX LENGTH	ANSI SQL DATA TYPE
+id	integer		INTEGER PRIMARY KEY
+name	string	50	VARCHAR(50)
+age_yrs	number	3 digits, 1 decimal	NUMERIC(3,1)
+breed	string	100	VARCHAR(100)
+weight_lbs	number		INTEGER
+microchipped	Boolean		BOOLEAN
+
+
+CREATE TABLE puppies (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(50),
+  age_yrs NUMERIC(3,1),
+  breed VARCHAR(100),
+  weight_lbs INTEGER,
+  microchipped BOOLEAN
+);
+Execute the statement:
+
+DROP TABLE puppies;
+to delete the puppies table.
+
+Note that dropping tables is a dangerous operation as it deletes all
+the data in the table with it. Exercise extreme caution when using DROP
+TABLE statements within production code.
+
+Inserting Data
+First, open up SQLite and create a new table named friends with the
+following column specifications:
+
+NAME	DATA TYPE	CONSTRAINTS
+id	INTEGER	PRIMARY KEY AUTOINCREMENT
+first_name	VARCHAR(255)	NOT NULL
+last_name	VARCHAR(255)	NOT NULL
+
+Use the SQL below to create the above table:
+
+CREATE TABLE friends (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL
+);
+Inserting data into the example table
+Now, you need to add table rows with some data. You can insert a new table
+row using the following syntax:
+
+INSERT INTO table_name
+VALUES
+  (column1_value, column2_value, column3_value);
+Fill out the friends table with information about five friends.
+In SQLite, enter the following to add new table rows.
+
+INSERT INTO friends (id, first_name, last_name)
+VALUES
+  (1, 'Amy', 'Pond');
+  Note the use of single quotation marks for string values. Also note that,
+  with the AUTOINCREMENT constraint on id you don't need to specify the
+  value when inserting. SQLite will start at 1 and increment it every time
+  you add a new row. You can choose to specify it and SQLite will continue
+  incrementing from the last row's id.
+
+You can also use the "multiple values" insert.
+
+  INSERT INTO friends (first_name, last_name)
+VALUES
+  ('Rose', 'Tyler'),
+  ('Martha', 'Jones'),
+  ('Donna', 'Noble'),
+  ('River', 'Song');
+
+  Using the previous example, if you try inserting a new row with an id of 5, you will get an error:
+
+INSERT INTO friends (id, first_name, last_name)
+VALUES (5, 'Jenny', 'Who');
+Because id is a primary key and that id is already taken, you should
+get a message in SQLite that it already exists:
+Error: UNIQUE constraint failed: friends.id
+  `;
+///////////////////////////////////////////////////////////////////////////
+`Recall, SQL stands for Structured Query Language, and whenever you write
+SQL you're usually querying a database. A query is simply a question you're
+asking a database, and you're aiming to get a response back. The response
+comes back to you as a list of table rows.
+
+Simple SELECT Query
+You can write a simple SELECT query to get results back from a desired SQL
+table. The syntax for the SELECT query is SELECT [columns] FROM [table];
+where [columns] are the desired column names from the table separated
+by commas.
+
+puppies table:
+
+ID	NAME	AGE_YRS	BREED	WEIGHT_LBS	MICROCHIPPED
+1	Cooper	1	Miniature Schnauzer	18	1
+2	Indie	0.5	Yorkshire Terrier	13	1
+3	Kota	0.7	Australian Shepherd	26	0
+4	Zoe	0.8	Korean Jindo	32	1
+5	Charley	1.5	Basset Hound	25	0
+6	Ladybird	0.6	Labradoodle	20	1
+7	Callie	0.9	Corgi	16	0
+8	Jaxson	0.4	Beagle	19	1
+9	Leinni	1	Miniature Schnauzer	25	1
+10	Max	1.6	German Shepherd	65	0
+
+Example table set up
+Open SQLite3 in your terminal, create the puppies table, and
+insert the rows using the following:
+
+CREATE TABLE puppies (
+  id INTEGER,
+  name VARCHAR(100),
+  age_yrs DECIMAL(2,1),
+  breed VARCHAR(100),
+  weight_lbs INT,
+  microchipped BOOLEAN
+);
+
+INSERT INTO puppies
+VALUES
+  (1, 'Cooper', 1, 'Miniature Schnauzer', 18, 1),
+  (2, 'Indie', 0.5, 'Yorkshire Terrier', 13, 1),
+  (3, 'Kota', 0.7, 'Australian Shepherd', 26, 0),
+  (4, 'Zoe', 0.8, 'Korean Jindo', 32, 1),
+  (5, 'Charley', 1.5, 'Basset Hound', 25, 0),
+  (6, 'Ladybird', 0.6, 'Labradoodle', 20, 1),
+  (7, 'Callie', 0.9, 'Corgi', 16, 0),
+  (8, 'Jaxson', 0.4, 'Beagle', 19, 1),
+  (9, 'Leinni', 1, 'Miniature Schnauzer', 25, 1),
+  (10, 'Max', 1.6, 'German Shepherd', 65, 0);
+
+  SELECT specific columns
+If you wanted to see just the name, age_yrs, and weight_lbs columns
+from the table, you could use the query:
+
+SELECT name, age_yrs, weight_lbs FROM puppies;
+
+This query will give you:
+
+NAME	AGE_YRS	WEIGHT_LBS
+Cooper	1	18
+Indie	0.5	13
+Kota	0.7	26
+Zoe	0.8	32
+Charley	1.5	25
+Ladybird	0.6	20
+Callie	0.9	16
+Jaxson	0.4	19
+Leinni	1	25
+Max	1.6	65
+Using SELECT * is a quick way to get back all the columns in a given table.
+It is discouraged in queries that you write for your applications. Use it
+only when playing around with data, not for production code.
+
+SELECT * FROM puppies;
+This will give you the original table with all columns and rows.
+///////////////////////////////////////////////////////////////////////////
+WHERE clause for a single value
+The simplest WHERE clause finds a row by a single column value.
+The query below finds the entry that has an id of 5:
+
+SELECT * FROM puppies
+  WHERE id = 5;
+Note that string values MUST use single quotation marks.
+
+You should get the following result:
+
+ID	NAME	AGE_YRS	BREED	WEIGHT_LBS	MICROCHIPPED
+5	Charley	1.5	Basset Hound	25	no`;
+///////////////////////////////////////////////////////////////////////////
