@@ -2015,4 +2015,55 @@ it will never be queried directly in that way. Instead, it will be queried
 by either the person_id or the elephant_id, or it will be used in a JOIN
 clause within a SELECT statement.
 
+///////////////////////////////////////////////////////////////////////////
+The DELETE CASCADE statement
+DELETE CASCADE statement use the following syntax:
+
+ALTER TABLE dbo.T2
+   ADD CONSTRAINT FK_T1_T2_Cascade
+   FOREIGN KEY (EmployeeID) REFERENCES dbo.T1(EmployeeID) ON DELETE CASCADE
+
+  You can see that the statement makes use of the ADD CONSTRAINT,
+  FOREIGN KEY REFERENCES AND ON DELETE CASCADE clause to find which
+  referenced table would be deleted. If a record in Table 1 (T1) is deleted,
+  all associated records in Table 2 (T2) also get deleted.
+
+ DELETE CASCADE in an example table
+Say you have an Employee table and Review table:
+
+Employee table:
+
+NAME	EMPLOYEE_ID	DEPARTMENT
+Cooper	1	Accounting
+Indie	2	HR
+Kota	3	Project Manager
+Review table:
+
+EMPLOYEE_ID	REVIEW
+1	2020
+1	2021
+2	2021
+3	2021
+Once you delete an employee, all of the review records associated with
+that employee should be deleted too. For example, if you deleted Cooper,
+then the reviews related to this Employee_ID would we deleted due to the
+effects of DELETE CASCADE.
+
+Giving you the following results:
+
+Employee table:
+
+NAME	EMPLOYEE_ID	DEPARTMENT
+Indie	2	HR
+Kota	3	Project Manager
+Review table:
+
+EMPLOYEE_ID	REVIEW
+2	2021
+3	2021
+The DELETE CASCADE condition will allow you to delete data on the parent
+table and any referencing data in the child tables in one command.
+This makes keeping track of data easier and more organized as your data
+grows. Instead of going through each table and individually deleting data
+the DELETE CASCADE statement will do most of the work for you.
 `;
