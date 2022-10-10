@@ -376,6 +376,7 @@ app4.get('/users', (req, res) => {
         // Process request data
         res.status(200);
         res.json(users);
+
     } catch(e) {
         // On failure
         res.status(500);
@@ -1951,4 +1952,67 @@ FROM table
    the results should first go through the WHERE filter.
   The 2 remaining clauses depend on the filtered result. Similarly,
   ORDER BY should come next, as using LIMIT before could result in lost data.
+`;
+///////////////////////////////////////////////////////////////////////////
+`
+One-to-many
+Imagine two tables - puppies and owners. Each puppy is owned by one person.
+Each person can own multiple puppies.
+
+To set up the puppies table to have a relationship with another table,
+there should be a primary key column and at least one foreign key column.
+In this example, the foreign key will connect to the primary key in the
+owners table for which each puppy has an owner. In other words, the create
+table statement for the puppies table should include a primary key (id),
+and a foreign key (owner_id).
+
+The resulting CREATE statement should look like the following:
+
+CREATE TABLE puppies (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  age_yrs NUMERIC(3,1),
+  breed VARCHAR(100),
+  weight_lbs INTEGER,
+  microchipped BOOLEAN DEFAULT 0,
+  owner_id INTEGER FOREIGN KEY
+);
+The owner_id column should refer to a corresponding id-type column in
+the owners table.
+
+CREATE TABLE owners (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(50) NOT NULL
+);
+///////////////////////////////////////////////////////////////////////////
+Many-to-many (join table)
+Next, imagine people are adopting elephants at the zoo to help with their
+care and feeding. Each elephant needs a lot of support, so multiple people
+will need to help each elephant. Additionally, each person could choose to
+help multiple elephants.
+
+The people and elephants table are "basic" data tables.
+
+CREATE TABLE people (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(50) NOT NULL
+);
+CREATE TABLE elephants (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  gender VARCHAR(6) NOT NULL,
+  age INTEGER
+);
+Notice that both tables have primary keys, and neither has foreign keys.
+Instead, the foreign keys will go together into a join table.
+
+CREATE TABLE people_elephants (
+  person_id INTEGER FOREIGN KEY NOT NULL,
+  elephant_id INTEGER FOREIGN KEY NOT NULL
+);
+There is not a need for a separate primary key in the join table because
+it will never be queried directly in that way. Instead, it will be queried
+by either the person_id or the elephant_id, or it will be used in a JOIN
+clause within a SELECT statement.
+
 `;
