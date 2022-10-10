@@ -2065,5 +2065,60 @@ The DELETE CASCADE condition will allow you to delete data on the parent
 table and any referencing data in the child tables in one command.
 This makes keeping track of data easier and more organized as your data
 grows. Instead of going through each table and individually deleting data
-the DELETE CASCADE statement will do most of the work for you.
-`;
+the DELETE CASCADE statement will do most of the work for you.`;
+///////////////////////////////////////////////////////////////////////////
+`An ORM, or Object Relational Mapping, is a technique or a library that
+allows you to map objects to rows in a database table. This allows you
+to work with your data without using SQL, and helps you to keep your data
+valid and secure.
+You can think of the ORM as the bridge between your object-oriented
+JavaScript code and your database. Using the ORM, you can use JavaScript
+methods to construct an instance of a new book and save it directly into
+the database. The ORM will translate your JavaScript code into SQL commands,
+run them, and insert the new book record as a new row in the database table
+based on the attributes of the book instance that you created. Similarly,
+the ORM allows you to access and manipulate data using JavaScript to read,
+update, and delete database records as well.
+
+Sequelize is a JavaScript-based Object Relational Mapping (ORM) library that
+you will be using within your Express applications. In this reading,
+you will explore the three main elements that make up Sequelize:
+
+Describe a model and what it represents
+Describe a migration and how it relates to a model
+Describe a seed
+Explain how models, migrations, and seeds work together in the ORM
+
+A model is a representation of data written into your code. Specifically,
+a model can be thought of as a "blueprint" for the data that is contained
+within a table in the database. In Sequelize, a model is a JavaScript class.
+Therefore, it has a name, as well as various properties (or attributes) which
+can be assigned values of a specific defined data type. As with other
+JavaScript classes, you can construct instances of the model. A model
+can include methods which can be called on an instance of the model,
+or the model (class) itself.
+
+The table below illustrates how a few aspects of a Book model in Sequelize
+map to a database table, Books.
+
+COMPONENT OF A MODEL	=>	COMPONENT OF THE DATABASE TABLE
+Class Name (Book)	=>	Table Name (Books)
+Property / Attribue Names (title, series, author)	=>	Column Names (title, series, author)
+Instance of the Model	=>	Row of data values (a single record in the table)
+
+Migrations
+A migration is a JavaScript file in Sequelize that defines a specific change
+to a database schema. For example, if you are starting a new project, you
+would run a migration to create a new database table. If you have an existing
+project, you might need to run a migration to make a small change to a table,
+such as adding a new column.
+
+Seeds
+In Sequelize, a piece of sample or test data is referred to as a seed.
+Seeder files are data files that you can use to populate a test database
+or make a change to the data that is already present. Similar to migrations,
+seed data can vary in scope. You can create brand new seed data to populate
+a new table, or use seed data to make a smaller update.
+
+Example #1: You are creating an application that requires a login, so you
+might create a seeder file to add a few demo users for your site.`;
