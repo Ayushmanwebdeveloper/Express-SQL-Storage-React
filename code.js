@@ -2121,4 +2121,131 @@ seed data can vary in scope. You can create brand new seed data to populate
 a new table, or use seed data to make a smaller update.
 
 Example #1: You are creating an application that requires a login, so you
-might create a seeder file to add a few demo users for your site.`;
+might create a seeder file to add a few demo users for your site.
+///////////////////////////////////////////////////////////////////////////
+To start using Sequelize within your Express applications, you will
+first need to install the following packages:
+
+sqlite3 - a library that implements the SQLite3 database engine
+sequelize - is the actual Sequelize ORM that contains all of its features
+for use within your Express server code
+sequelize-cli - a wrapper to the sequelize package so that you can perform
+Sequelize operations through the command-line interface instead of via a
+JS script
+`;
+///////////////////////////////////////////////////////////////////////////
+`To initialize your Sequelize database, you will need to create a
+.sequelizerc file that defines where all your database dependencies are.
+Specifically, you will need to define paths for the following:
+
+Config
+Models
+Seeding
+Migrations
+
+For example starting with a basic Express application that looks like the
+following:
+
+├── README.md
+└── server
+    ├── app.js
+    └── package.json
+Then, to initialize Sequelize within your application, you would run the
+following command within the server directory:
+
+> npx sequelize init
+
+This result will look like:
+
+├── README.md
+└── server
+    ├── app.js
+    ├── config
+    │   └── config.json
+    ├── migrations
+    ├── models
+    │   └── index.js
+    ├── package.json
+    └── seeders
+You could imagine if your Express application begins to get more complex,
+having the database files in the server directory would make the directory
+harder to navigate.
+
+In comes .sequelizerc to the rescue! By creating a .sequelizerc file as
+described below, you can place all of our database files into a
+separate directory called db:
+
+// .sequelizerc
+
+const path = require("path");
+
+module.exports = {
+  config: path.resolve("config", "database.js"),
+  "models-path": path.resolve("db", "models"),
+  "seeders-path": path.resolve("db", "seeders"),
+  "migrations-path": path.resolve("db", "migrations"),
+};
+The result of running your init command will now look like:
+
+├── README.md
+└── server
+    ├── app.js
+    ├── config
+    │   └── database.js
+    ├── db
+    │   ├── migrations
+    │   ├── models
+    │   │   └── index.js
+    │   └── seeders
+    ├── package-lock.json
+    └── package.json
+Now all the database files are within the db and config folders where they
+won't crowd other Express related files in your application.
+
+However, you will be customizing the database.js file for the configuring
+of Sequelize to connect to and use: a SQLite database for development,
+and a PostgresQL database for production. In development, your database.js
+should look like the following:
+
+module.exports = {
+  development: {
+    storage: process.env.DB_FILE,
+    dialect: "sqlite",
+    seederStorage: "sequelize",
+    benchmark: true,
+    logQueryParameters: true,
+    typeValidation: true,
+    // logging: false
+  },
+};
+The storage key is instructing Sequelize where to look for the database.
+This configuration is utilizing an environment variable DB_FILE which will
+need to be created in the next step.
+
+The dialect key is telling Sequelize what type of database it is connecting
+to.
+
+The seederStorage key will allow Sequelize to track which seed files have
+been run in the database, allowing for easier seeding and unseeding.
+
+The benchmark key will log the time it takes for Sequelize to execute each
+query that is run.
+
+The logQueryParameters key will log the values used as parameters in the SQL
+queries that it generates. Without this key Sequelize will log the queries
+with the "$1", "$2", etc., placeholders, similar to the ? seen in the SQL
+queries you have previously written.
+
+The typeValidation key will prevent values from being inserted into the
+database that do not have the same type as described in the model
+(integer, for instance). This enforces a model-level validation for these
+data types.
+
+Finally, the logging key in this configuration is commented out. By default
+it has a value of "console.log", meaning each SQL query that is generated
+and run by Sequelize will be printed to the terminal with the console.log
+statement. A false is commented out here as a reminder that this
+functionality can be disabled or overwritten with a different function
+if desired, something which may occasionally be helpful in debugging
+Express applications in order to clean up the console.
+`;
