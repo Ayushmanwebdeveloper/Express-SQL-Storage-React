@@ -2598,8 +2598,7 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('Users');
   }
-};`
-///////////////////////////////////////////////////////////////////////////
+};`///////////////////////////////////////////////////////////////////////////
 `Performing validations on your data
 Like database-level constraints, model-level validations are meant to
 ensure integrity of the data being put into your database. This means
@@ -2735,4 +2734,441 @@ User.init({
             }
         }
     }
-})`
+})`///////////////////////////////////////////////////////////////////////////
+/*Seeder files are files that contain instructions on how to seed the
+database. In short, to seed a database means to insert an initial set of
+data to populate the database with something.
+
+Seeding is useful for testing your application with usable data or setting up
+new production-level databases with necessary initial data quickly and
+consistently.
+
+When setting up your database, seeding happens after all the models and
+initial migrations are created and performed, as it wouldn't make sense
+to insert data without having the database set up.
+
+Like migrations and models, seeder files can be generated via the
+command-line interface like so:
+
+> npx sequelize-cli seed:generate --name <name of seed>
+Sometimes you will need to create multiple seeder files to populate your
+database properly, specifically when you're working with multiple tables.
+Generally, separating your concerns is the way to go.
+
+Note that seeder files are typically meant to be run only once when the
+database is being initialized. Errors can occur if updates to the database
+schema are made in future migrations.
+
+For example, if you created a User model that has attributes firstName and
+lastName and your seeder file adds Users based on this definition. If, down
+the line, you add an attribute, say middleName, to the User model that
+is required, then running the seeder again may fail because the original
+seeding instructions didn't specify the middleName attribute.*/
+///////////////////////////////////////////////////////////////////////////
+`
+Creating your seeder files
+After creating your seeder files by running:
+
+> npx sequelize-cli seed:generate --name <name of seed>
+you can now define how you want to seed your database. This command creates
+a seeder file with the format XXXXXXXXXXXXXX-name-of-seeder.js where the Xs
+represent a date.
+
+The file will look something like this:
+
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    /**
+     * Add seed commands here.
+     *
+     * Example:
+     * await queryInterface.bulkInsert('People', [{
+     *   name: 'John Doe',
+     *   isBetaMember: false
+     * }], {});
+    */
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    /**
+     * Add commands to revert seed here.
+     *
+     * Example:
+     * await queryInterface.bulkDelete('People', null, {});
+     */
+  }
+};
+Like migrations, you have up and down exports that define how to seed and
+unseed your database respectively.
+
+Defining your Ups and Downs
+Now that you've created your seed file, you'll need to define them.
+
+Inserting seed data
+To insert entries to your database via up, you will be using the .bulkInsert
+method from queryInterface. The first argument is the table you want to
+insert into, and the second argument is an array of the entries you want
+entered in the form of plain-old JavaScript objects.
+
+This will look something like:
+
+await queryInterface.bulkInsert('People', [
+    {
+        name: 'John Doe',
+    },
+    {
+        name: 'Jane Doe',
+    }
+]);
+To actually execute the seed, run:
+
+> npx sequelize-cli db:seed:all <path-to-db>
+This will will run all your seed files to populate your database. If you only
+want to run a specific seed file, you can instead run:
+
+> npx sequelize-cli db:seed --seed <name of seeder>
+Reverting a seed
+To undo a seeding via down, you will similarly use the .bulkDelete method on
+queryInterface. Like .bulkInsert, the first argument is the table name you
+want the seeds removed from, but the second argument is an object
+representing a WHERE clause in a SQL query. The keys of the object represent
+the column you want to target, and the value is an array of the column values
+you want removed.
+
+This will look like this correspondingly to the insert:
+
+await queryInterface.bulkDelete('People', {
+      name: ['John Doe', 'Jane Doe']
+});
+Note that it is on you as the developer to define what to delete. Make sure
+to be specific here and delete only the seed entries and not the entire
+table!
+
+See the WHERE clause reading for more details on how you can customize the
+second argument to filter the deletion.
+
+To run the down seeder and undo the seed, run the following command:
+
+> npx sequelize-cli db:seed:undo:all
+Or similarly for a specific seed only:
+
+> npx sequelize-cli db:seed:undo --seed <name of seeder>`;
+///////////////////////////////////////////////////////////////////////////
+/*Find methods
+In Sequelize, SELECT statements are executed by "finder" methods on your
+models. The most common ones you will be using will be the findAll and
+findOne methods.
+
+Say you have a User model defined already and you've already seeded your
+database with some users.
+
+If you wanted to execute the following SQL statement:
+
+SELECT * FROM Users;
+The equivalent finder method implementation would look like:
+
+const users = await User.findAll();
+Similarly, you could use either the findOne or findAll method again with
+an attributes object supplied to indicate which columns you want returned.
+
+For example, to execute the following SQL:
+
+SELECT firstName, lastName From Users;
+The following line of code can be used to retrieve those columns:
+
+// All instances
+const users = await User.findAll({
+    attributes: ['firstName', 'lastName']
+});
+
+// One instance
+const user = await User.findOne({
+    attributes: ['firstName', 'lastName']
+});
+These are just a few examples of uses of finder methods. Sequelize supports
+a few other finder methods that can be used more conveniently in certain
+cases, or can provide more functionalities. Check them out here.
+*/
+///////////////////////////////////////////////////////////////////////////
+`
+To insert data using SQL, you can use the following syntax:
+
+INSERT INTO table_name
+VALUES
+  (column1_value, column2_value, column3_value);
+For example, to insert a single record into the dogs table, you could use
+the following SQL:
+
+INSERT INTO dogs (id, dog_name, breed)
+VALUES
+  (3, 'Fido', 'Dalmation');
+And to insert multiple records into the dogs table:
+
+INSERT INTO dogs (id, dog_name, breed)
+VALUES
+  ('Fido', 'Dalmation'),
+  ('Maggie', 'Golden Retriever'),
+  ('Toby', 'Poodle');
+Using Sequelize, you have multiple options for how you might choose to
+enter this same data into your database. For the examples below, assume
+that you are working with this Dog model in Sequelize, as defined below:
+
+const { Sequelize, Model, DataTypes } = require("sequelize");
+const sequelize = new Sequelize("sqlite::memory:");
+
+const Dog = sequelize.define("dog", {
+  dogName: DataTypes.TEXT,
+  breed: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  }
+});
+Using build and save to persist a single record
+The first option for persisting a record is to generate an instance of the
+Sequelize model using Model.build. While build will generate an instance of
+the model with any attributes that you assign, it does NOT persist that model
+in the database. In order to do that, you must use the Instance.save method
+on the instance that you already built.
+
+For example, the code below will insert a single dog into the dogs table
+using the build and save approach:
+
+// Generate a new instance of the Dog model
+const newDog = Dog.build({ dogName: "Fido", breed: "Dalmation" })
+
+    // Check if Fido is in the database
+    await Dog.findOne({ where: { dogName: "Fido" } }); // returns null
+
+// Insert the newDog instance into the database
+await newDog.save();
+
+    // Check if Fido is in the database
+    await Dog.findOne({ where: { dogName: "Fido" } }); // returns Fido's
+    record
+The build method generates an instance of a new dog that could be persisted
+in the database. At this stage, you can call methods on it, you can assign
+new attributes or re-assign attributes. But if you try to find it in the
+database, it would not be found until after you call the save method on it.
+You can learn more about this approach in the Sequelize documentation on
+Creating an Instance.
+
+Using create to persist a single record
+The second option is to use the Model.create method, which will run a
+build as well as a save to the instance you build, with a single method call.
+
+// Create a new instance of the Dog model and save the instance to the
+database
+const newDog = await Dog.create({ dogName: "Fido", breed: "Dalmation" })
+
+    // Check if Fido is in the database
+    await Dog.findOne({ where: { dogName: "Fido" } }); // returns Fido's
+    record
+You can learn more about this approach in the Sequelize documentation on
+the Create method.
+
+Since create accomplishes the same thing as using build and then save,
+why might you choose one approach over the other? The create approach is
+a good choice if you are comfortable immediately persisting the record
+to the database without any further manipulation. However, if you need
+to manipulate the data or perform further validations before saving it
+to the database, it is best to use build to generate the model, then work
+with the instance of the model as needed, before using save. In many cases,
+you may choose to use the two-step approach when working with user-input
+data to help standardize or protect the quality of the data.
+
+Using bulkCreate to persist multiple records at once
+Just as SQL allows us to add multiple records at once, Sequelize provides
+similar functionality. The bulkCreate method takes in an array of instances
+to persist in the database, as well as some additional optional options.
+
+// Create three new instances of the Dog model and save the instance
+to the database
+const newDog = await Dog.bulkcreate([
+    { dogName: "Fido", breed: "Dalmation" },
+    { dogName: "Maggie", breed: "Golden Retriever" },
+    { dogName: "Toby", breed: "Poodle" }
+])
+    // Check if the new dogs are in the database
+    const databaseDogs = await Dog.findAll(); // returns the records of all dogs
+To learn more about the various options you can use with the bulkCreate
+method, check the Sequelize documentation on bulkCreate. These options
+allow you to specify important details such as whether a single record
+or the entire insertion should fail if a validation fails, or how to deal
+with duplicate records.
+
+Common error messages when inserting data
+A variety of error messages might pop up when inserting data.
+You may receive an error message if a model-level validation fails
+(ValidationError), or you may receive an error directly from the database
+if a database-level constraint fails (such as a uniqueness constraint).
+
+You can use the instance.validate method to run any model-level validations
+on a record before saving it to the database. This will allow you to catch
+the errors before triggering the SQL commands to actually insert the data
+in the table. For example, if you look at the dog Model at the top of this
+reading, you will notice a model-level validation that requires that the
+breed is not null. The validate method can be used to manually run the
+validation before saving thre record to the database. You can learn more
+about this method in the Sequelize documentation on the Validate method.
+
+// Generate a new instance of the Dog model
+const newDog = Dog.build({ dogName: "Fido" })
+
+// Validate the new dog object
+await newDog.validate() // fails the validation with a
+SequelizeValidationError
+
+// Manipulate the new dog object
+newDog.breed = "Dalmation"
+
+// Validate the new dog object
+await newDog.validate() // passes the validation
+
+// Save the new dog record to the database table
+await newDog.save()
+`;
+/*UPDATE birds
+SET longitude = 81.623863
+WHERE species = "Great Blue Heron"
+Updating a single record
+Using Sequelize, we can accomplish the same update by using a
+find -> update -> save approach. First, find the record that needs
+to be updated in the table, update the attribute(s) that needs to be changed,
+and then save the record.
+
+Changing a single attribute
+You can do this through re-assigning the value of an attribute:
+
+// Find the record
+const greatBlueHeron = await Bird.findOne({ where: { species: "Great Blue Heron" } });
+
+// Update the attribute through re-assigning a value
+greatBlueHeron.longitude = 81.623863;
+
+// Save the updated record
+await greatBlueHeron.save();
+Changing multiple attributes
+Or, you can use the set method to change one or more attribute values:
+
+// Find the record
+const greatBlueHeron = await Bird.findOne({ where: { species: "Great Blue Heron" } });
+
+// Update the attribute(s) using the set method
+greatBlueHeron.set({
+    longitude: 81.623863,
+    latitude: 58.936047
+});
+
+// Save the updated record
+await greatBlueHeron.save();
+In both examples, the attributes are initally updated only in
+the greatBlueHeron instance, and not in the birds table. The record in
+the table is only updated after the save() method is called, and any
+changed attribute on the instance will be updated in the table.
+
+When you need more control over which attributes are updated in the
+database, you can use the Instance.update method instead of the save method.
+The update method will both set the new attributes on the instance as
+well as save those changes in the database table.
+
+// Find the record
+const greatBlueHeron = await Bird.findOne({ where: { species: "Great Blue Heron" } });
+
+// Update the species of the instance
+greatBlueHeron.set({species: "GBH" });
+
+// Update only the longitude and latitude in the table
+greatBlueHeron.update({
+    longitude: 81.623863,
+    latitude: 58.936047
+});
+In this example, the update method only updates the latitude
+and longitude values in the table. Any other change made to the instance,
+such as changing the species, is not saved to the table. You can learn
+more about these approaches in the Sequelize documentation on Updating
+an Instance.
+
+Updating multiple records at once
+To update more than one record, you can use the Model.update method.
+You call the method on the model itself, and pass in a hash of values
+to be updated. The options object allows you to specify the WHERE clause
+to control which records are updated.
+
+Imagine the birds table above. You realize that the American Robin and
+Belted Kingfisher were actually observed in the same location, so you
+need to update the longitude and latitude for both records. You can do
+so using the code below:
+
+Bird.update(
+    { latitude: 70.0000, longitude: 130.333333 }, // attributes and values to update
+    { where:
+        { id: { [Op.or]: [1, 2] } }  // specific records to update
+    }
+);
+While this method does allow you to define the specific records to update,
+this approach can lead to trouble if you make a mistake with the where
+options. If you leave out that option, every record will be updated.
+You can refer to the Sequelize documentation on update to learn about
+the other options available for this method.
+
+Updating records in seeder files
+Similar to inserting data, you can use a queryInterface method to perform
+a bulk update on your seed data, using the syntax pattern below:
+
+queryInterface.bulkUpdate(table, data, options);
+For more on this method, see the Sequalize documentation on bulkUpdate.
+Note that similar to the queryInterface.bulkCreate method, this approach
+will not run validations on every record. You can add the options
+{ validate: true, individualHooks: true } to make sure that any invalid
+data is caught before triggering the SQL update command.*/
+//////////////////////////////////////////
+`
+To delete a single record or multiple records, you would use:
+
+DELETE FROM [table] WHERE [condition]
+To delete a single record, you would set the WHERE clause to the id
+(or other unique identifier) of the record you want to delete.
+To delete multiple records, you would craft your WHERE clause to catch
+all of the records that need to be deleted. If you omit the WHERE clause, you would delete
+every row in the table.
+
+Deleting a single record using Sequelize
+To delete a single record using Sequelize, you first need to find the specific record,
+and then delete the instance by calling the destroy method on it. For example, imagine
+the birds table from the previous lessons.
+
+ID	SPECIES	LATITUDE	LONGITUDE
+1	American Robin	66.160507	-153.369141
+2	Belted Kingfisher	82.507487	-147.826054
+3	Great Blue Heron	23.936047	181.623863
+You realize that the data for the Great Blue Heron is incorrect and the record should
+be deleted. You can do so using the following code:
+
+// Find the record by id
+const greatBlueHeron = await Bird.findOne({ where: { id: 3 } });
+// Delete the record using the destroy method
+await greatBlueHeron.destroy(); // the one row is removed from the table
+Note: Sequelize provides many options for the Instance.destroy method. For example,
+the paranoid option allows you to define whether records should be completely deleted,
+or whether they should be timestamped as deleted but actually saved (as a backup) in a
+different location outside of the given table. Check out the Sequelize documentation on
+Instance.destroy to learn more about this advanced option.
+
+Deleting multiple records at once
+To delete multiple records using Sequelize, you take the same approach. First you need to
+find the specific records to delete, and then call the destroy method on the model to complete
+the deletion. You define the specific records to be destroyed within the where option.
+
+await Bird.destroy(
+    { where:
+        { id: { [Op.lte]: 2 } }  // specific records to delete
+    }
+);
+In the code above, you are deleting any record that meets the WHERE condition - in this case,
+the birds with an id less than or equal to 2 (American Robin and Belted Kingfisher). As with
+any delete operation, be very careful when crafting your WHERE condition, as you might
+accidentally delete records that you wanted to keep. As an extra safeguard, Sequelize provides
+additional options you can define to control this behavior. See the Sequelize documentation for
+Model.destroy for more details.`;
