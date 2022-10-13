@@ -2249,3 +2249,165 @@ functionality can be disabled or overwritten with a different function
 if desired, something which may occasionally be helpful in debugging
 Express applications in order to clean up the console.
 `;
+///////////////////////////////////////////////////////////////////////////
+// Up/Down Migrations
+// The queryInterface contains two callback functions that fulfill promises.
+// The first queryInterface has an up callback function with the promise to
+// create a table. The second down callback drops the table.
+
+// To insert entries into your database using the up, you will be using the
+// .createTable method from the queryInterface. The first argument is the
+// table name you wish to insert, followed by the second argument being an
+// array of entries in the structure of plain JavaScript objects. The object
+// will contain all the data types and constraints that are needed in your
+// table.
+
+// It will look something like this:
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Person', {
+      name: Sequelize.DataTypes.STRING,
+      isAlphaMember: {
+        type: Sequelize.DataTypes.BOOLEAN,
+        primaryKey: true,
+        allowNull: false,
+      }
+    });
+}};
+// Dropping a table with queryInterface
+// Dropping a table is much more simple than creating it! The down callback
+// export allows you to drop a table. To insert which table you want to drop
+// you use the .dropTable method from the queryInterface and it takes in an
+// argument of the name of the table you wish to drop.
+
+// It will look like this:
+
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('Person', { id: Sequelize.INTEGER });
+     */
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Person');
+  }
+};
+// This will cause the table named Person and all the contents of the
+// table to be dropped.
+
+// This is an example of a table being created and dropped:
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Person', {
+      name: Sequelize.DataTypes.STRING,
+      isBetaMember: {
+        type: Sequelize.DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      }
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Person');
+  }
+};
+/*Running Migrations
+Now that you have defined your up and down table migrations the next step
+is to insert the tables into the database. To create or drop the table you
+need to run the db:migrate command. The command is:
+
+> npx sequelize-cli db:migrate
+Once that command is executed the tables will be created or dropped and
+migrated into or out of your database depending on the respective up/down
+functions defined in your migration file.*/
+// Undoing a Migration
+// To run the down migration and undo a single migration, run the command:
+
+// > npx sequelize-cli db:migrate:undo
+// To undo all of the migrations, run the command:
+
+// > npx sequelize-cli db:migrate:undo:all
+// Lastly, to undo a specific migration, you can run the command:
+
+// > npx sequelize-cli db:migrate:undo --name <name of migration>
+// Each command has its use cases. Using db:migrate:undo will undo your last
+// migration ran. The db:migrate:undo:all will undo all of the migrations that
+// you have made in the entire database. However, if you only want to undo a
+// specific migration without affecting all of your other migrations then
+// you can run the db:migrate:undo --name <name of migration>. The name of
+// the migration will also include the Xs of the migration file name, it
+// would look something like this: xxxxxxxxxxxxxx-name-of-migration.
+// Be careful of which migration undo command you run so you don't accidentally
+// undo a migration that you didn't mean to.
+///////////////////////////////////////////////////////////////////////////
+// Rerunning a Migration
+// When dropping a table make sure there is no table being created in your up
+// migration.
+
+// The code should look like this:
+
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('Person', { id: Sequelize.INTEGER });
+     */
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Person');
+  }
+};
+// Note: Remember to the db:migrate command to execute the drop and check if
+// the table has been dropped:
+
+// > npx sequelize-cli db:migrate
+// Once the table is dropped you can rerun the migration by recreating the up
+// table and running the same db:migrate command. This will cause you to create
+// the table again from the beginning.
+///////////////////////////////////////////////////////////////////////////
+// What is the difference between the up and down function in a migration
+// file?
+
+// The up function defines the change to the database schema that should
+// be made, while the down function defines the logic to undo a specific
+// change.
+///////////////////////////////////////////////////////////////////////////
+/*Step 1: Generate a migration file
+In the terminal, use sequelize-cli to generate a new migration. Name
+this migration create-color.
+
+When this step is completed you should see a new file created in the
+migrations directory.
+
+Step 2: Use queryInterface to create a new table
+In the migration file that was created, utilize the queryInterface to create
+a new table in the up key's callback function. The name of this table should
+be Colors.
+Step 3: Use queryInterface to drop the table
+Utilize the queryInterface to drop the table in the down key's
+callback function. It is always good practice to create these corresponding
+down actions as the migration is created. This will be executed whenever
+undoing the migration.
+
+Step 4: Run the migration
+Use sequelize-cli to run the migration, creating the Colors table.
+
+Step 5: Validate the table creation
+Open the database with sqlite3 in the terminal.
+
+Check which tables exist in the database with .tables. You should see the
+Colors table that you defined as well as the SequelizeMeta table created
+by Sequelize.*/
