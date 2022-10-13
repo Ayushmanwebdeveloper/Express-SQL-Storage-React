@@ -2411,3 +2411,328 @@ Open the database with sqlite3 in the terminal.
 Check which tables exist in the database with .tables. You should see the
 Colors table that you defined as well as the SequelizeMeta table created
 by Sequelize.*/
+
+///////////////////////////////////////////////////////////////////////////
+`
+Sequelize Models
+Sequelize models represent the tables in your database in an object-oriented
+way. Each Sequelize model is a class in JavaScript that provides an intuitive
+interface for manipulating and reading data in the table that it models.
+
+The models class represents the entire table that it models, and an instance
+of that model class can represent a single record in the table. The model
+tells Sequelize information about the entity it represents such as the table
+name in the database and the different data types that it consists of.
+
+An example would look like this:
+
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    // Helper method for defining associations.
+    static associate(models) {
+      // define association here
+    }
+  };
+  User.init({
+    // Model attributes are defined here
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    lastName: {
+      type: DataTypes.STRING
+      // allowNull defaults to true
+    }
+  }, {
+    // Other model options go here
+    sequelize, // We need to pass the connection instance
+    modelName: 'User' // We need to choose the model name
+  });
+
+  return User;
+};
+Extending the Functionality of a Sequelize Model
+A Sequelize model is not limited to the default properties and methods.
+In fact, you can add more properties to the model class and add custom
+methods on top of the ones Sequelize provides in the model class.
+
+That would look something like this:
+
+class User extends Model {
+  static classLevelMethod() {
+    return 'foo';
+  }
+  instanceLevelMethod() {
+    return 'bar';
+  }
+  getFullname() {
+    return [this.firstname, this.lastname].join(' ');
+  }
+}
+User.init({
+  firstname: Sequelize.TEXT,
+  lastname: Sequelize.TEXT
+}, { sequelize });
+
+console.log(User.classLevelMethod()); // 'foo'
+const user = User.build({ firstname: 'Jane', lastname: 'Doe' });
+console.log(user.instanceLevelMethod()); // 'bar'
+console.log(user.getFullname()); // 'Jane Doe'
+With the addition of custom properties and methods, Sequelize allows your
+Model to implement functionality specific to your application.
+
+Adding Validations to Models
+You can even add validations to Models, ensuring data passes specific tests
+before SQL is generated to save entries to the database. There will be more
+on validations in the future, but this is an example of adding validations
+to prevent null input, returning a custom error message:
+
+const { Model } = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    // Helper method for defining associations.
+    static associate(models) {
+      // define association here
+    }
+  };
+
+  User.init({
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        // custom validation setting
+        notNull: {
+          msg: 'Please enter a first name'
+          // if null sends error message
+        }
+      }
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        // custom validation setting
+        notNull: {
+          msg: 'Please enter a last name'
+          // if null sends error message
+        }
+      }
+    }
+  }, {
+    sequelize,
+    modelName: 'User'
+  });
+
+  return User;
+};
+How to use Models
+To use a model, you need to import the db/model/index.js file and destructure
+the desired classes const { Model1, Model2 } = requre('db/model').
+
+To create a new instance of a model, you use the JS class syntax for creating
+a new instance of a class const instance1 = new Model1().
+
+You can also generate a model by running the following command:
+
+> npx sequelize-cli model:generate --name User --attributes name:string
+This command allows you to create a model file in the models folder as
+well as a migration file in the migrations folder. You can even add as
+many attributes as you need in your model, separating each attribute and
+datatype pair by a comma. The model file generated will match the name of
+the model, user.js, and the migration file generated will include a timestamp
+as well as a message that it created the indicated model,
+YYYYMMDDHHMMSS-create-user.js.
+
+The models file would look like this:
+
+'use strict';
+const {
+  Model
+} = require('sequelize');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of the Sequelize lifecycle.
+     * The models/index file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+    }
+  };
+  User.init({
+    name: DataTypes.STRING
+  }, {
+    sequelize,
+    modelName: 'User',
+  });
+  return User;
+};
+The generated migrations file looks like this:
+
+'use strict';
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Users', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      name: {
+        type: Sequelize.STRING
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      }
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Users');
+  }
+};`
+///////////////////////////////////////////////////////////////////////////
+`Performing validations on your data
+Like database-level constraints, model-level validations are meant to
+ensure integrity of the data being put into your database. This means
+making sure that the data is in as usable of a form as possible so that
+when you do need to use it, minimal additional processing is required.
+
+These validations are run every time an attempt to insert a record through
+Sequelize is made.
+
+Examples of these might look like:
+
+Making sure the price of a good is greater than 0.
+Checking that a Tweet's length is no longer than 280 characters.
+Verifying that a phone number is valid.
+Model validations are different from database constraints mainly in they
+can be as basic or as fine tuned and detailed as you want. Database
+constraints are limited to a few key properties defined by SQL, while
+model validations can take advantage of any programmatic logic you can
+think of.
+
+This isn't to say that because model validations exist that you should
+forgo writing database constraints. Model-level validations will only
+run when you interact with data in Sequelize, not directly through the
+database. This is to say that database constraints are a kind of fail-safe
+in the event that your model validations fail to catch something.
+This can happen due to faulty logic in your code, or simply Sequelize
+not performing validation for EVERY operation.
+
+Set up your model to use model-level validations
+The initialization of a model without validations should have the column
+names as keys and its data type as its value. To apply validations to the
+columns, you need to change the its value to an object with a key of type
+as its data type.
+
+For example, if a User model has a firstName column, the initialization
+of the model should look like this by default:
+
+User.init({
+    firstName: Sequelize.STRING(20)
+    // ...
+})
+Convert it to look like this so you can apply model validations to the
+firstName column:
+
+User.init({
+    firstName: {
+        type: Sequelize.STRING(20)
+    }
+    // ...
+})
+Applying model-level validations
+In Sequelize, you can choose from an array of built-in validators, or
+you can choose to write your own custom validator.
+
+Equivalent database constraints
+You can make the equivalent SQL database constraints for the column
+data type, uniqueness, and allowing/disallowing null values by adding
+keys onto the object for each column at model initialization.
+
+User.init({
+    firstName: {
+        type: Sequelize.STRING(20), // data type
+        allowNull: false,           // don't allow null values, true by default
+        unique: true                // uniqueness, false by default
+    }
+    // ...
+})
+Built-in validators
+The built-in validators are implemented by the validator.js library, which
+offers a lot of convenient checks, for example:
+
+User.init({
+    firstName: {
+        type: Sequelize.STRING(20),
+        validate: {
+            is: /^[a-z]+$/i,          // matches this RegExp
+            isAlpha: true,            // will only allow letters
+            notNull: true,            // won't allow null
+        }
+    }
+    // ...
+})
+Check out the validator.js page for all the options that are available, and
+the Sequelize docs for more detailed functionalities.
+
+Custom validators
+Creating your own custom validators is as simple as writing a function. The
+functions won't have to return anything, but should just throw an error if
+a condition is not met.
+
+For example, a custom validator that checks if a User's first name begins
+with a capital letter:
+
+User.init({
+    firstName: {
+        type: Sequelize.STRING(20),
+        validate: {
+            // ...
+            beginsWithCapital(value) {
+                if(value[0] !== value[0].toUpperCase()) {
+                    throw new Error("First name doesn't begin with a capital letter!");
+                }
+            }
+        }
+    }
+    // ...
+})
+Examples of other custom validators are shown in the Sequelize docs.
+
+Model-wide validators
+Sometimes, the need for validators that check across multiple columns is
+necessary. Sequelize supports validation for these cases in the second
+argument of an .init call.
+
+Using the above example of the User, say that for some reason you want
+both the first and last name to begin with the letter "S", a validator
+for that might look like:
+
+User.init({
+    firstName: {
+        // ...
+    },
+    lastName: {
+        // ...
+    }
+    // ...
+}, {
+    sequelize,
+    validate: {
+        bothBeginWithS() {
+            if(this.firstName[0] !== "S" || this.lastName[0] !== "S") {
+                throw new Error("Both first and last name must begin with an S!");
+            }
+        }
+    }
+})`
