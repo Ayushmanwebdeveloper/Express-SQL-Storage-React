@@ -3172,3 +3172,252 @@ any delete operation, be very careful when crafting your WHERE condition, as you
 accidentally delete records that you wanted to keep. As an extra safeguard, Sequelize provides
 additional options you can define to control this behavior. See the Sequelize documentation for
 Model.destroy for more details.`;
+//////////////////////////////////////////////////////////////////////////////////////////////
+/*Recall that in SQL, to define a relationship between two tables,
+a foreign key column must exist in one table that references column values
+within another table.
+
+To do that within Sequelize, it's as simple as adding a foreign key column
+to the appropriate createTable migration. A foreign key column definition
+will include a references attribute, which specifies which table and column
+the foreign key refers to. It can also include an onDelete attribute which
+describes how a DELETE operation on the reference table affects the the
+records in the table.
+
+The references attribute is an object that has two keys. The model key
+is the name of the table, NOT the name of the model (the name of the key
+is a little misleading). The key key is the name of the column in the
+referenced table that connects with the foreign key column (usually the
+primary key).
+
+This will look something like this:
+
+queryInterface.createTable('TableOneName', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true
+    },
+
+    // ... other columns within table
+
+    tableTwoId: {
+        type: Sequelize.INTEGER,
+        references: {
+            model: 'TableTwoName',
+            key: 'id',
+        },
+        onDelete: 'cascade'
+    }
+})
+Example
+Let's say you're designing a Twitter-like clone, and in your database, you
+have a Users table and a Tweets table. Users can create many tweets, but
+each tweet will only have one owner, so in this case, you would have a
+one-to-many relationship.
+
+users-tweets-db-schema
+
+The table migrations would look something like the following:
+
+// XXXXXXXXXXXXXXX-create-user.js
+'use strict';
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Users', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      firstName: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      lastName: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      }
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Users');
+  }
+};
+// XXXXXXXXXXXXXXX-create-tweet.js
+'use strict';
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Tweets', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      length: {
+        type: Sequelize.INTEGER,
+      },
+      content: {
+        type: Sequelize.STRING(280),
+        allowNull: false
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      },
+      userId: {
+          type: Sequelize.INTEGER,
+          references: {
+              model: 'Users',
+              key: 'id'
+          },
+          onDelete: 'cascade'
+      }
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Musicians');
+  }
+};
+In the final migration file above, the Tweets createTable migration has
+the references attribute which contains the table being references, Users,
+and the column within the Users table being referenced, id. The onDelete:
+'cascade' would indicate that if the user is deleted, all the tweets
+referencing that user's record would also be deleted.
+
+NOTE: The references attribute should only be defined for foreign keycolumns.
+*/
+//////////////////////////////////////////////////////////////////////////////////////////////
+`
+The simplest way to create a many-to-many relationship between two tables
+is to create a JOIN table that bridges the tables together.
+
+The JOIN table should have two foreign key columns, where one references a
+column in the first table, and the other references a column in the second
+table. Thus creating a many-to-many relationship between the first and
+second table.
+
+Below is a database schema with an example of a many-to-many relationship
+created between the Movies table and the Genres table.
+
+JOIN-table-db-schema
+
+MovieGenres is a JOIN table that has:
+
+a movieId foreign key that references the id primary key of the Movies table
+a genreId foreign key that references the id primary key of the Genres table
+The JOIN table, MovieGenres allows the Movies table to establish a
+many-to-many relationship with the Genre table. A movie can have one
+or more genres and a genre can contain multiple movies through the JOIN
+table.
+
+Creating a JOIN table using Sequelize
+To create a JOIN table using Sequelize, you first need to add migrations
+for creating the two tables that it's connecting. Then add a migration for
+creating the JOIN table which references the first two tables.
+
+Using the previous movies example, you would first need to add migrations
+for creating the Movies and Genres tables:
+
+npx sequelize model:generate --name Movies --attributes title:string
+npx sequelize model:generate --name Genres --attributes genre:string
+Then add the migration to create the MovieGenres table:
+
+npx sequelize model:generate --name MovieGenres --attributes
+movieId:integer,genreId:integer
+Then you should edit the MovieGenres migration file so that the movieId
+column references the id column in the Movies table and the genreId
+column references the id column in the Genres table:
+
+// up function in the migration file to create the MovieGenres table
+up: async (queryInterface, Sequelize) => {
+  await queryInterface.createTable('MovieGenres', {
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER
+    },
+    movieId: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: { model: 'Movies' }
+    },
+    genreId: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: { model: 'Genres' }
+    },
+    createdAt: {
+      allowNull: false,
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    },
+    updatedAt: {
+      allowNull: false,
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    }
+  });
+},
+After you migrate all 3 migrations, you should have the two tables
+with another JOIN table connecting them. This creates a many-to-many
+relationship between the first two tables.`;
+/*It is important to remember that the model property should point to the
+table name, not the model name. The key property points to the column name*/
+//////////////////////////////////////////////////////////////////////////////////////////////
+/*
+Using Sequelize to Order Query Results
+You can use Sequelize to order your query results in a number of different
+ways.
+
+1. Using the order key
+From any finder method, you can define the order key in the options object
+to order the query results. There are a few different ways to accomplish
+this.
+
+For example, imagine you are constructing a query to get all of
+individual student's grades, ordered from most recent to least recent
+submission date. You can use the order key to order the submission results
+by the createdAt date, in descending order.
+
+const student = await Student.findByPk(5);
+const submissions = await student.getSubmissions({
+    order: ['createdAt', 'DESC']
+});
+// Makes the following SQL query:
+// SELECT 'Submissions'.* FROM 'Submissions' WHERE 'studentId' = ? ORDER BY 'createdAt' DESC;
+In this example, the first item in the order array represents the column
+name for ordering the results, and the second item in the array represents
+the direction for ordering the results.
+
+2. Ordering by multiple properties
+You can also order query results by multiple properties. To do this, just
+add additional nested array elements in the order array. For example, a
+teacher wants to see all assignments. The assignments should be ordered
+alphabetically by name. However, there may be multiple assignments with
+the same name (used in different courses, or in different years), We can
+order those by their createdAt date descending so the most recent
+assignments are at the top.
+
+const teacher = await Teacher.findByPk(2);
+const assignments = await teacher.getAssignments({
+    order: [ ['name', 'ASC'], ['createdAt', 'DESC'] ]
+});
+// Makes the following SQL query:
+// SELECT 'Assignments'.* FROM 'Assignments' WHERE 'teacherId' = ? ORDER BY 'name' ASC, 'createdAt' DESC;
+In this case, a nested array is created for each attribute that the query
+is ordered by. The attribute on the left will be ordered first and then
+the rest of the attributes will be applied from left to right.*/
