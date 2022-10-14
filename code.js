@@ -3730,6 +3730,7 @@ Virtual DOM diff`;
 `
 //////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
+
 Create a Function Component
 A React function component is a function that returns a JSX element.
 The name of the function is PascalCase by convention.
@@ -3936,3 +3937,64 @@ function CorrectComponent() {
     </>
   );
 }`;
+/*
+To begin, install a global version of create-react-app:
+
+npm i -g create-react-app
+You only need to install create-react-app on your computer once, i.e.,
+not before every project.
+
+Then, execute the following command:
+
+npx create-react-app react-template --use-npm
+Because the tools that Create React App installed are making JavaScript
+for you from the JSX files, all of the JSX files are getting read and
+bundled up into other JavaScript files that are sent to the browser.
+What you write in all of the JavaScript files in the src directory are
+not the files that are sent to the browser.
+
+The Create React App tool created a project for you that uses a tool called
+Webpack. Webpack reads a bunch of different types of files--CSS, images,
+JavaScript, and so on--and bundles them all up into JavaScript files.
+
+The src/index.js file is the entry file. All JavaScript files imported into
+this file will be bundled up by Webpack into a single JavaScript file.
+
+You may see other non-JavaScript files imported. If you look inside
+src/index.js, you'll see this statement.
+
+import './index.css';
+That doesn't make ANY SENSE! ES6 imports in JavaScript normally import
+only JavaScript files; importing CSS files is not supported by default.
+But, the src/index.js file is not what the browser sees. Instead,
+Webpack figures out that the file imports the CSS file src/index.css,
+reads all of that CSS, turns it into JavaScript, and removes that
+import statement from what it will send to your browser.
+
+Try typing npm run build. That will create a build directory.
+If you look inside build/static/js, you will see the files that
+Webpack creates to send to the browser. They're named things like
+2.7caf6610.chunk.js and main.b875719a.chunk.js. That's what Webpack sends
+to the browser, not your entry file, index.js.
+
+The downside of sending multiple files is that you need to determine
+which files should be loaded first. With Webpack, you don't need to worry
+about this because you are sending one JavaScript file bundling all your
+files together.
+
+It's not really magic. But if you see an import in the JavaScript files
+that doesn't make sense, like importing the logo.svg file, you can assume
+that Webpack is working behind the scenes to bundle all your files--i.e.,
+not just your JavaScript files--together.
+
+Another thing to note is that the imports for other components do not end
+with .js. That's because Webpack is smart enough to know that you mean a
+JavaScript file: when it is building the stuff that it will send to the
+browser, it can see all of the files in the directories and figure out
+which ones are referenced by the import statements.
+
+The browser can't do that because it could be on the other side of the
+world from the Web server. That's why, when loading ES modules in the
+browser, you have to specify the .js extension, so the browser can get
+the correct resource from the server.
+*/
