@@ -3570,3 +3570,160 @@ const filteredUsers = async User.findAll({
 });
 
 */
+////////////////////////////////////////////////////////////////////////
+                               `React`
+`Using vanilla JavaScript, you could create DOM elements based on data that
+comes back from an API call like this:`
+
+fetch('https://example.com/api/people')
+  .then(response => response.json())
+  .then(people => {
+    const html = '<ul>';
+    for (let person of data.people) {
+      html += `<li>${person.lastName}, ${person.firstName}</li>`;
+    }
+    html += '</ul>';
+    document.querySelector('#people-list').innerHTML = html;
+  });
+`Using JSX, you could achieve the same effect like this:``function PeopleList(props) {
+return (
+{props.people.map(person => (
+{person.lastName}, {person.firstName}
+))}
+); }
+const peopleListElement = document.querySelector('#people-list');
+fetch('https://example.com/api/people')
+ .then(response => response.json())
+ .then(people => { const props = { people };
+ReactDOM.render(, peopleListElement); });``
+
+You found out that React has a variety of good points that encourage you to
+choose it as the means to build your front-end:
+
+React encourages modular development
+React is easy to use, easy to start with, and has some great tools
+React follows the declarative programming style
+React encourages reusability in your code
+React has one way that data flows which makes it much easier to reason
+about the code
+React uses a "virtual DOM" to make changes to the real DOM very fast and
+efficient`;
+
+`
+Developers invented a new language that sits on top of JavaScript called
+JavaScript eXtension, or JSX. JavaScript eXtension (JSX) uses familiar
+HTML syntax in JavaScript files that can be transpiled by tools like
+Babel into JavaScript code.
+
+Creating elements
+To create a React virtual DOM node using JSX, define HTML syntax in
+a JavaScript file.
+
+const hello = <h1>Hello World!</h1>
+Here, the JavaScript hello variable is set to a React virtual DOM h1
+element with the text "Hello World!".
+
+You can also nest virtual DOM nodes in each other just like how you do it
+in HTML with the real DOM.
+
+const navBar = (
+  <nav>
+    <ul>
+      <li>Home</li>
+      <li>Profile</li>
+      <li>Settings</li>
+    </ul>
+  </nav>
+);
+A JavaScript navBar variable is set to a React virtual DOM nav element
+that has a ul React element nested inside of it. The ul element has
+three li child elements with text as their child.
+
+Remember, don't be fooled! JSX looks like HTML, but is not actually HTML.
+No real HTML DOM elements have been created yet. You still need React to
+convert the virtual DOM nodes created from the JSX into real DOM elements.
+
+HTML attributes in JSX
+Now, how do you add HTML attributes like class, href, and src to React
+elements created using JSX?
+
+In HTML, you can define these attributes on the element like so:
+
+<a class="nav-link" href="/home">
+  <img src="home">
+  Home
+</a>
+In JSX, you can define these attributes in a similar fashion:
+
+const navList = (
+  <ul>
+    <li className="selected">
+      <a href="/pets">Pets</a>
+    </li>
+    <li>
+      <a href="/owners">Owners</a>
+    </li>
+  </ul>
+);
+The HTML attribute names are mostly the same in JSX. There are a few
+exceptions. In the above example, className is used in JSX instead of
+the class HTML attribute. You may see other discrepencies with HTML
+attribute names in JSX in the future, but the main difference is that
+JSX uses camelCase instead of sword-case. Check out the React DOM
+elements docs to see examples of other differences.
+
+Converting to virtual DOM
+So how do you tell React to convert virtual DOM nodes into real DOM nodes?
+To start the conversion process, you have to use the ReactDOM.render
+method which takes a React virtual DOM node and a real DOM node in
+the document. ReactDOM.render will convert the virtual DOM node into a real
+DOM and nest it under the given real DOM node.
+
+Remember, you can get a real DOM node by using document.querySelector, or
+document.getElementById (if the element has an id attribute).
+
+If you wanted to insert what was created in the last section into the
+main tag, the most straightforward way is like this:
+
+// Put the element tree in a variable
+const navList = (
+  <ul>
+    <li className="selected">
+      <a href="/pets">Pets</a>
+    </li>
+    <li>
+      <a href="/owners">Owners</a>
+    </li>
+  </ul>
+);
+
+// Get a DOM node for React to render to
+const mainElement = document.querySelector('main');
+
+// Give React the element tree and the target
+ReactDOM.render(navList, mainElement);
+At this point, you have given your desired element tree to React.
+It will take that element tree and construct the virtual DOM from it.
+After it builds its own model of the virtual DOM using the elements that
+you created, it can now take that and turn that into real DOM.
+
+Convert virtual DOM to real DOM
+
+It takes that real DOM and inserts it as the content of the target that
+you gave it which, in this case, is the main element in the body of the
+document.
+
+Updates
+When you call ReactDOM.render again for the same component and target,
+React takes the existing virtual DOM it knows about last time it rendered
+the element tree, compares it to whatever new thing you want to render,
+and determines which (if any) of the living DOM needs to change.
+
+For example, let's say you constructed the same element tree but left
+off the "selected" class for the first list element. Then, when you
+rendered it, again, by calling ReactDOM.render, React would compare the
+new element tree with the old element tree, figure out that one class was
+missing on that one li element, and remove that and only that from the real
+DOM.
+
+Virtual DOM diff`;
