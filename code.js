@@ -3515,3 +3515,58 @@ In this reading, you learned what pagination and how it is used on the web.
 You also learned how pagination works in SQL using the LIMIT and OFFSET
 clauses and how to apply those SQL clauses in Sequelize.
 `
+/*Search filters are typically implemented in SQL using WHERE clauses.
+See the WHERE clause reading as a refresher!
+
+Search filters in web development
+If you want to add search filters to query results returned from a GET
+endpoint, you would define the attribute you want to refine the search
+results by and its value in the query parameters.
+
+For example, a GET to /sofas?color=light+brown&minWidth=71&design=modular
+would look for sofas that have the color of "light brown", a minimum width
+of 71 inches, and a modular design.
+
+The implementation of this in SQL depends on how your tables are designed,
+but it could look as simple as:
+
+SELECT * FROM sofas
+    WHERE color = 'light brown'
+    AND width >= 71
+    AND design = 'modular';
+
+    ////////////////////////////////////////////
+    // DON'T DO THIS: order users using JavaScript
+const users = async User.findAll();
+const orderedUsers = users.sort((userA, userB) => {
+  if (userA.lastName === userB.lastName) {
+    return userA.firstName < userB.firstName;
+  }
+  return userA.lastName < userB.lastName;
+});
+
+// DO THIS: order users using Sequelize/SQL
+const orderedUsers = async User.findAll({
+  order: [
+    ['lastName'], ['firstName']
+  ]
+});
+
+// DON'T DO THIS: filter users using JavaScript
+const users = async User.findAll();
+const filteredUsers = users.filter(user => {
+  return (
+    user.firstName === 'John' &&
+    user.lastName === 'Smith'
+  );
+});
+
+// DO THIS: filter users using Sequelize/SQL
+const filteredUsers = async User.findAll({
+  where: {
+    firstName: 'John',
+    lastName: 'Smith'
+  }
+});
+
+*/
