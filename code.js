@@ -3421,3 +3421,97 @@ const assignments = await teacher.getAssignments({
 In this case, a nested array is created for each attribute that the query
 is ordered by. The attribute on the left will be ordered first and then
 the rest of the attributes will be applied from left to right.*/
+`Pagination is when the results of a query are broken down for use into
+smaller chunks, or pages. You've probably seen pagination used on the
+Internet already!
+
+If you've ever done a Google search, you will get roughly 10 matching
+results shown to you on the webpage, even thought there are likely hundred
+or thousands of matching results. Google splits the results so that only
+a digestible number of links are presented, and lets you go through further
+pages of results at the bottom of the page to view the next 10 and so on and
+so forth.
+
+google-search
+
+Pagination in SQL
+To achieve pagination in SQL, the LIMIT and OFFSET keywords are used.
+Here's an example of a SQL query paginating to get the third set of 10
+results, or the third page of 10 results, or rows 31-40:
+
+SELECT * FROM exampleTable
+    LIMIT 10 OFFSET 30;
+The LIMIT clause specifies the maximum number of results to pull,
+in this case 10.
+
+The OFFSET clause specifies how many rows of the results to skip before
+returning results, in this case 30.
+
+So this query is skipping the first 30 rows, and returning the next 10 rows.
+
+Example Scenario
+Here's a scenario:
+
+Suppose there is a query result that normally returns 43 results.
+If you wanted to split the results into 5 pages with an equal number
+of results besides the last page, then each page would have at least
+10 results besides the last page which will have 3 results.
+
+pagination-diagram-1
+
+What should the LIMIT be to return the results of page 5?
+
+Since each page should contain 10 results, the LIMIT clause should be 10,
+even though the page in question should only return 3. The 10 specifies
+a maximum so 3 results should still be in the result if executed properly.
+
+What should the OFFSET be to return the results of page 5?
+
+The OFFSET clause should equal 40 because we want to skip the first 4 pages,
+and return what's on the fifth page. The 4 pages of 10 results each gives
+us 40 results to skip.
+
+The final result should look like:
+
+SELECT * FROM exampleTable2
+    LIMIT 10 OFFSET 40;
+This will return the 3 results on page 5.
+
+LIMIT and OFFSET in Sequelize
+Paginating in Sequelize uses the same LIMIT and OFFSET keys and simply
+places them in the finder method's options. Converting the last example
+into a Sequelize query:
+
+ExampleModel2.findAll({
+    limit: 4,
+    offset: 16
+})
+For documentation for pagination in Sequelize, check out the docs
+[here][pagination-docs].
+
+Pagination in Web Development
+If you want to add pagination to query results returned from a GET
+endpoint, you would define the page and the number of results in a page
+that you want to receive in the response.
+
+Then, you can use query parameters to define the page number and number
+of results per page.
+
+For example, a GET to /artists?page=5&size=4 would ask the GET endpoint
+to return the results on page 5 where each page has a maximum of 4 results.
+
+pagination-diagram-2
+
+The logic you would need to write would be just to determine the SQL LIMIT
+and OFFSET values to get the desired results. In this example, you would
+skip the first 4 pages, so an offset of 4 pages times 4 results/page is 16,
+and the limit would be 4 as you want the next 4 results which represent the
+fifth page.
+
+LIMIT  = ( x results/page )
+OFFSET = ( y pages ) * ( x results/page )
+What you learned
+In this reading, you learned what pagination and how it is used on the web.
+You also learned how pagination works in SQL using the LIMIT and OFFSET
+clauses and how to apply those SQL clauses in Sequelize.
+`
