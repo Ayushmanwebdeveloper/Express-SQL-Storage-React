@@ -4533,3 +4533,147 @@ using useHistory to redirect your user. Don't try to force the code to use
 readable. useHistory is sometimes the best choice to avoid unnecessary
 complexity.
 `;
+////////////////////////////////////////////////////////////////////////////
+// For example, imagine creating a simple frontend application with three main
+// pages: a home welcome page (path of /), a users index page (path of /users),
+// and user profile pages (path of /users/:userId). Now imagine if every user
+// had links to separate posts and photos pages.
+
+// You can create those routes and links within the user profile component
+// instead of creating the routes and links where the main routes are defined.
+
+// What are nested routes?
+// To understand what nested routes are, consider a user Profile component.
+// Imagine you have a route in your application's entry file to each user's
+// profile page like so:
+
+// This means that upon navigating to http://localhost:3000/users/1, you would
+// render the following Profile component and the userId parameter from the
+// useParams hook would have the value of "1".
+
+// // ./src/components/Profile.js
+// import React from "react";
+// import { useParams } from 'react-router-dom';
+
+// const Profile = () => {
+//   const { userId } = useParams();
+
+//   return <h1>Hello from User Profile {userId}!</h1>
+// }
+
+// export default Profile;
+// What if you wanted to render the photos of the user on the Profile component
+// at the /users/:userId/photos path, or an about me section at the
+// /users/:userId/about-me path? You can render <Route> components
+// in Profile like so:
+
+// // ./src/components/Profile.js
+// import React from "react";
+// import { Route, Link, useParams } from 'react-router-dom';
+
+// const Profile = () => {
+//   const { userId } = useParams();
+
+//   return (
+//     <>
+//       <h1>Hello from User Profile {userId}!</h1>
+//       <Link to={`/users/${userId}/photos`}>Photos</Link>
+//       <Link to={`/users/${userId}/about-me`}>About Me</Link>
+
+//       <Route path="/users/:userId/photos">
+//         <h2>Photos for {userId}</h2>
+//       </Route>
+//       <Route path="/users/:userId/about-me">
+//         <h2>About Me for {userId}</h2>
+//       </Route>
+//     </>
+//   );
+// }
+
+// export default Profile;
+// Since this route is not created until the Profile component is rendered,
+// you are dynamically creating your nested /users/:userId/photos and
+// /users/:userId/about-me routes.
+
+// Navigate to http://localhost/users/8. You should see links to the
+// photos and the about me for the user with an id of 8. "Hello from
+// Profile 8" should never change when switching between the /users/8/photos
+// and /users/8/about-me paths, but you'll see the text below it change.
+
+// useRouteMatch hook
+// Currently, the <Link>'s to prop and the <Route>'s path prop in the
+// Profile component are not very DRY. React Router's useRouteMatch hook
+// can help with this. The useRouteMatch hook returns a match object with
+// a key of url. If you're at the /users/8 path, then match.url will
+// be /users/8. Use match.url to make your code DRYer.
+
+// Replace /users/${userId} in the <Link>'s to props with ${match.url}.
+// Replace /users/:userId in the <Route>'s path props with ${match.url}.
+
+// // ./src/components/Profile.js
+// import React from "react";
+// import { Route, Link, useParams, useRouteMatch } from 'react-router-dom';
+
+// const Profile = () => {
+//   const { userId } = useParams();
+//   const match = useRouteMatch();
+
+//   return (
+//     <>
+//       <h1>Hello from User Profile {userId}!</h1>
+//       {/* Replaced `/users/${userId}` URL with `${match.url}` */}
+//       <Link to={`${match.url}/photos`}>Photos</Link>
+//       <Link to={`${match.url}/about-me`}>About Me</Link>
+
+//       {/* Replaced `/users/:userId` path with `${match.url}` */}
+//       <Route path={`${match.url}/photos`}>
+//         <h2>Photos for {userId}</h2>
+//       </Route>
+//       <Route path={`${match.url}/about-me`}>
+//         <h2>About Me for {userId}</h2>
+//       </Route>
+//     </>
+//   );
+// }
+// You can also destructure url from the useRouteMatch hook like so:
+
+// const { url } = useRouteMatch();
+// If you do this, the Profile component will look even better:
+
+// // ./src/components/Profile.js
+// import React from "react";
+// import { Route, Link, useParams, useRouteMatch } from 'react-router-dom';
+
+// const Profile = () => {
+//   const { userId } = useParams();
+//   const { url } = useRouteMatch();
+
+//   return (
+//     <>
+//       <h1>Hello from User Profile {userId}!</h1>
+//       {/* Replaced `/users/${userId}` URL with `${url}` */}
+//       <Link to={`${url}/photos`}>Photos</Link>
+//       <Link to={`${url}/about-me`}>About Me</Link>
+
+//       {/* Replaced `/users/:userId` path with `${url}` */}
+//       <Route path={`${url}/photos`}>
+//         <h2>Photos for {userId}</h2>
+//       </Route>
+//       <Route path={`${url}/about-me`}>
+//         <h2>About Me for {userId}</h2>
+//       </Route>
+//     </>
+//   );
+// }
+// In the future, you may choose to implement nested routes to keep your
+// application's routes organized within related components.
+
+// Here are other useful keys on the match object returned from useRouteMatch:
+
+// isExact is true if the url matches the rendered Route path exactly
+// path is the path pattern (e.g., /users/:userId instead of /users/8)
+// params is the params object returned from useParams
+// useLocation hook
+// useLocation is the only React Router hook that you have not yet examined.
+// Take a look at the docs on useLocation to see how to use this hook.
+
