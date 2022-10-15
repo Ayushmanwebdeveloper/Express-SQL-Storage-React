@@ -3998,3 +3998,229 @@ world from the Web server. That's why, when loading ES modules in the
 browser, you have to specify the .js extension, so the browser can get
 the correct resource from the server.
 */
+/////////////////////////////////////////////////////
+`
+cd my-app && npm install --save react-router-dom@^5.1.2
+Start the React development server at http://localhost:3000:
+
+npm start
+Now import BrowserRouter from react-router-dom in your entry file,
+src/index.js:
+
+// ./src/index.js
+import { BrowserRouter } from 'react-router-dom';
+BrowserRouter
+BrowserRouter is the primary component of the router that wraps your
+route hierarchy. It makes routing information from React Router available
+to all its descendent components. For example, if you want to give <App>
+and all its children components access to React Router, you would wrap
+<App> like so:
+
+// ./src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+
+const Root = () => {
+  return (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  );
+};
+(You would also need to connect this new Root component in ReactDOM.render
+  instead of App.)
+
+// ./src/index.js
+ReactDOM.render(
+  <React.StrictMode>
+    <Root />
+  </React.StrictMode>,
+  document.getElementById('root'),
+);
+Now you can route the rendering of certain components to certain URLs
+(e.g., https://www.website.com/profile).
+
+HashRouter
+Alternatively, you could import and use HashRouter from react-router-dom.
+Links for applications that use <HashRouter> would look
+like https://www.website.com/#/profile (with a # between the domain and path).
+
+You'll focus on using <BrowserRouter>. <HashRouter> is primarily used
+in legacy code or for sites that need to be compatible with legacy browsers.
+
+<Route> component
+React Router helps your React application render specific components
+based on the URL path. The React Router component you'll use most often
+is <Route>.
+
+The <Route> component is used to wrap another component, causing that
+component to be rendered only if a certain URL is matched. The behavior
+of the <Route> component is controlled by the following props: exact and
+path.
+
+The App component at App.js is returning <h1>Hello from App</h1>.
+Add a ! to change the rendered text to Hello from App!. Create a similar
+component Users that returns <h1>Hello from Users!</h1>. To do this, add
+a components folder in the src folder and make a file called Users.js.
+The Users.js file should look exactly like App.js except with Users
+substituted everywhere for App.
+
+Now let's refactor your index.js file so that you can create your routes
+within a Root component. First, run your imports. You'll need the App and
+Users component along with the BrowserRouter and Route components from
+react-router-dom.
+
+// ./src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
+import App from './App';
+import Users from './components/Users';
+const Root = () => {
+  return (
+    <BrowserRouter>
+      <div>
+        {/* TODO: Routes */}
+      </div>
+    </BrowserRouter>
+  );
+};
+Finally, make sure that you have connected the Root component in
+ReactDOM.render instead of App.
+
+ReactDOM.render(
+  <React.StrictMode>
+    <Root />
+  </React.StrictMode>,
+  document.getElementById('root'),
+);
+Put it all together and you've got a dynamic browser routing component.
+
+Note that BrowserRouter can only have a single child component, so the
+snippet above wraps all routes within a parent <div> element.
+
+Now let's create some routes!
+
+<Route>
+Your Root component should render the App component at the root path
+of /. Do this by wrapping App with a Route containing a path prop set to /.
+
+// ./src/index.js
+// ...
+const Root = () => {
+  return (
+    <BrowserRouter>
+      <div>
+        <Route path="/">
+          <App />
+        </Route>
+      </div>
+    </BrowserRouter>
+  );
+};
+// ...
+Navigate to http://localhost:3000. You should see the text, "Hello from App!"
+
+Next, render the Users component at the path of /users.
+
+// ./src/index.js
+// ...
+const Root = () => {
+  return (
+    <BrowserRouter>
+      <div>
+        <Route path="/">
+          <App />
+        </Route>
+        <Route path="/users">
+          <Users />
+        </Route>
+      </div>
+    </BrowserRouter>
+  );
+};
+// ...
+The wrapped component App will be rendered only when the path is matched.
+The path matches the URL when it matches some initial portion of the URL.
+For example, a path of / would match both / and /users URLs.
+(/ matches the URL /users because /users begins with a /.)
+
+Take a moment to navigate to http://localhost:3000/users to see both
+"Hello from App!" and "Hello from Users!", which means both the App
+component and the Users component are rendering at the path of /users.
+
+If you navigate to a route NOT beginning in /users, like /test, then
+you should only see the App component rendered.
+
+exact prop
+If this exact flag is set as a prop in the Route component, the path
+will match only when it exactly matches the URL. If you add exact to
+the route for App, then browsing to the /users path will no longer
+match / and only the Users component will be rendered (instead of both
+the App component and the Users component).
+
+Navigate to http://localhost:3000/users. You should see only
+"Hello from Users!", which means only the Users component is rendering
+at the path of /users. The App component will now only render at exactly
+the path of /.
+
+Path params and useParams
+A component's props can also hold information about a URL's parameters.
+The router will match route segments starting at : up to the
+next /, ?, or #. Such segments are wildcard values that make up your
+route parameters.
+
+For example, take the route below:
+
+The router would break down the full /users/:userId path into two
+parts: /users, :userId.
+
+The Profile component can access the :userId part of the
+http://localhost:3000/users/:userId URL through a function given by
+React Router called useParams. useParams returns information about all the
+wildcard values in your route parameters.
+
+To use it, simply import the useParams function from react-router-dom and
+call it inside of a React component. It returns a params object.
+For example:
+
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
+function Example() {
+  const params = useParams();
+}
+The params object would then have a property of userId which would hold
+the value of the :userId wildcard value. Let's render the userId parameter
+in a user profile component. Take a moment to create a Profile.js file in
+the components folder with the following code:
+
+// ./src/components/Profile.js
+import React from "react";
+import { useParams } from 'react-router-dom';
+
+const Profile = () => {
+  const params = useParams();
+  const { userId } = params;
+
+  return <h1>Hello from User Profile {userId}!</h1>
+}
+
+export default Profile;
+Don't forget to import your Profile component in src/index.js!
+
+In a real world application, you would use this wildcard to make an AJAX
+call to fetch the user information from the database and render the
+returned data in the Profile component. Recall that your Profile
+component was rendered at the path /users/:userId. Thus you can use your
+userId parameters to fetch a specific user.
+
+The useParams function is a specific type of function used in React
+components called a hook. Hooks are functions that give a component access
+to data that doesn't need to be passed down directly by the parent
+component. They also help manage the flow of data across the multiple
+renders of a React component. You'll see more examples of React Router
+and React hooks later this week.
+`;
